@@ -18,6 +18,8 @@
 #include "cardMaker.h"
 #include "odePlaneGeom.h"
 
+#include "mobot_model.h"
+
 using namespace std;
 
 // Global stuff
@@ -25,6 +27,8 @@ using namespace std;
 OdeBody *body;
 OdeWorld world;
 NodePath sphere;
+NodePath cyl;
+OdeBody *cylBody;
 OdeSimpleSpace* space;
 OdeJointGroup* contactgroup;
 PT(ClockObject) globalClock = ClockObject::get_global_clock();
@@ -82,6 +86,10 @@ int main(int argc, char *argv[]) {
 #endif
 
   simulation();
+
+  // Set the camera position
+  camera.set_pos (5, 5, 5);
+  camera.look_at (0, 0, 1);
  
   // This is a simpler way to do stuff every frame,
   // if you're too lazy to create a task.
@@ -97,19 +105,21 @@ int main(int argc, char *argv[]) {
 
 void simulation(){
   // Load the cube where the ball will fall from
+#if 0
   NodePath cube = window->load_model(framework.get_models(), "models/box");
   cube.reparent_to(window->get_render());
   cube.set_scale(0.25, 0.25, 0.25);
   cube.set_pos(0, 0, 0);
+#endif
  
   // Load the smiley model which will act as our iron ball
   sphere = window->load_model(framework.get_models(), "models/box");
+  sphere.set_pos(-.5, -.5, -.5);
   sphere.reparent_to(window->get_render());
-  sphere.set_scale(0.25, 0.25, 0.25);
-  sphere.set_pos(0, 0, 1);
- 
+  sphere.set_scale(0.25, 0.02, 0.25);
+  
   // Setup our physics world and the body
-  world.set_gravity( 0, 0, -9.81 );
+  world.set_gravity( 0 , 0, -9.81 );
   world.init_surface_table(1);
   world.set_surface_entry(
       0,  // id 1
@@ -128,7 +138,26 @@ void simulation(){
   contactgroup = new OdeJointGroup();
   space->set_auto_collide_joint_group(*contactgroup);
 
+  cyl = window->load_model(framework.get_models(), "models/smiley");
+  cyl.reparent_to(window->get_render());
+  cylBody = new OdeBody(world);
+  OdeMass M = OdeMass();
+  M.set_box(1, 1, 1, 1);
+  cylBody->set_mass(M);
+  cylBody->set_position(1, 0, 1.5);
+
+  OdeGeom* geom;
+  geom = new OdeCylinderGeom(
+      *space, 1, 1);
+  LQuaternionf q;
+  q.set_from_axis_angle(90, LVector3f(1, 0, 0));
+  geom->set_collide_bits(0xFF);
+  geom->set_category_bits(0);
+  geom->set_body(*cylBody);
+  geom->set_offset_quaternion(q);
+ 
   /* Create the body */
+#if 0
   body = new OdeBody(world);
   OdeMass M = OdeMass();
   M.set_box(50, 1.0, 1.0, 1.0);
@@ -139,20 +168,19 @@ void simulation(){
   boxGeom->set_collide_bits(0x02);
   boxGeom->set_category_bits(0x01);
   boxGeom->set_body(*body);
+#endif
+  body = build_faceplate1(&world, space, 0, 0, 2, sphere.get_quat(window->get_render()));
 
   /* Create ground plane */
   CardMaker* cm = new CardMaker("ground");
   cm->set_frame(-20, 20, -20, 20);
+  //cm->set_frame(-1, 1, -1, 1);
   NodePath ground = window->get_render().attach_new_node(cm->generate());
   ground.set_pos(0,0,0); ground.look_at(0, 0, -1);
   OdePlaneGeom* groundGeom = new OdePlaneGeom(*space, (dReal)0, (dReal)0, (dReal)1, (dReal)0);
-  groundGeom->set_collide_bits(0x01);
-  groundGeom->set_category_bits(0x02);
+  groundGeom->set_collide_bits(0xFF);
+  groundGeom->set_category_bits(0x20);
 
- 
-  // Set the camera position
-  camera.set_pos (80, -20, 40);
-  camera.look_at (0, 0, 0);
  
   PT(GenericAsyncTask) simulationTaskObject =
     new GenericAsyncTask("startup task", &simulationTask, (void*) NULL);
@@ -177,6 +205,9 @@ AsyncTask::DoneStatus simulationTask (GenericAsyncTask* task, void* data) {
   // set the new positions
   sphere.set_pos_quat(window->get_render(),
     body->get_position(), body->get_quaternion());
+  cyl.set_pos_quat(window->get_render(),
+    cylBody->get_position(), cylBody->get_quaternion());
+
   contactgroup->empty();
   return AsyncTask::DS_cont;
 }
