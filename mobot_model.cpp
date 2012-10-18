@@ -1,7 +1,35 @@
 #include "mobot_model.h"
 
-OdeBody* build_faceplate1(OdeWorld* world, OdeSpace* space, dReal x, dReal y, dReal z, LQuaternionf rot)
+MobotModel::MobotModel(WindowFramework* window, PandaFramework* framework)
 {
+  _window = window;
+  _framework = framework;
+  _numBodies = 0;
+}
+
+MobotModel::~MobotModel()
+{
+}
+
+void MobotModel::update()
+{
+  int i;
+  for(i = 0; i < _numBodies; i++) {
+    _nodePaths[i].set_pos_quat(
+        _window->get_render(),
+        _odeBodies[i]->get_position(),
+        _odeBodies[i]->get_quaternion()
+        );
+  }
+}
+
+void MobotModel::build_faceplate1(OdeWorld* world, OdeSpace* space, dReal x, dReal y, dReal z, LQuaternionf rot)
+{
+  /* Create the nodepath */
+  NodePath node = _window->load_model(_framework->get_models(), "models/box");
+  node.reparent_to(_window->get_render());
+  //node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
+  node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
   OdeBody *body = new OdeBody(*world);
   OdeMass M = OdeMass();
   M.set_box(FACEPLATE_M, FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
@@ -19,7 +47,6 @@ OdeBody* build_faceplate1(OdeWorld* world, OdeSpace* space, dReal x, dReal y, dR
   geom->set_collide_bits(0xFF & (~FACEPLATE1_CAT));
   geom->set_category_bits(FACEPLATE1_CAT);
   geom->set_body(*body);
-
 
   /* Box 2 */
   geom = new OdeBoxGeom(*space, 
@@ -48,7 +75,7 @@ OdeBody* build_faceplate1(OdeWorld* world, OdeSpace* space, dReal x, dReal y, dR
       0);
 
   /* Cylinder 4 */
-  geom = new OdeCylinderGeom(*space, FACEPLATE_R*1.01, FACEPLATE_Y*1.01);
+  geom = new OdeCylinderGeom(*space, FACEPLATE_R*1.01, FACEPLATE_Y*.99);
   geom->set_collide_bits(0xFF & (~FACEPLATE1_CAT));
   geom->set_category_bits(FACEPLATE1_CAT);
   geom->set_body(*body);
@@ -61,7 +88,7 @@ OdeBody* build_faceplate1(OdeWorld* world, OdeSpace* space, dReal x, dReal y, dR
       0);
 
   /* Cylinder 5 */
-  geom = new OdeCylinderGeom(*space, FACEPLATE_R*1.01, FACEPLATE_Y*1.01);
+  geom = new OdeCylinderGeom(*space, FACEPLATE_R*1.01, FACEPLATE_Y*.99);
   geom->set_collide_bits(0xFF & (~FACEPLATE1_CAT));
   geom->set_category_bits(FACEPLATE1_CAT);
   geom->set_body(*body);
@@ -73,7 +100,7 @@ OdeBody* build_faceplate1(OdeWorld* world, OdeSpace* space, dReal x, dReal y, dR
       0);
 
   /* Cylinder 6 */
-  geom = new OdeCylinderGeom(*space, FACEPLATE_R*1.01, FACEPLATE_Y*1.01);
+  geom = new OdeCylinderGeom(*space, FACEPLATE_R*1.01, FACEPLATE_Y*.99);
   geom->set_collide_bits(0xFF & (~FACEPLATE1_CAT));
   geom->set_category_bits(FACEPLATE1_CAT);
   geom->set_body(*body);
@@ -96,5 +123,12 @@ OdeBody* build_faceplate1(OdeWorld* world, OdeSpace* space, dReal x, dReal y, dR
       -FACEPLATE_Z/2.0 + FACEPLATE_R,
       0);
 
-  return body;
+  _odeBodies[_numBodies] = body;
+  _nodePaths[_numBodies] = node;
+  _numBodies++;
+}
+
+LVector3f MobotModel::get_position(int index)
+{
+  return _odeBodies[index]->get_position();
 }

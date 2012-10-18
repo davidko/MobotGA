@@ -31,6 +31,7 @@ NodePath cyl;
 OdeBody *cylBody;
 OdeSimpleSpace* space;
 OdeJointGroup* contactgroup;
+MobotModel* mobot;
 PT(ClockObject) globalClock = ClockObject::get_global_clock();
  
 // Create an accumulator to track the time since the sim
@@ -67,8 +68,10 @@ int main(int argc, char *argv[]) {
  
   // Open the window
   window = framework.open_window();
-  window->setup_trackball();
+  //window->setup_trackball();
   camera = window->get_camera_group(); // Get the camera and store it
+
+  mobot = new MobotModel(window, &framework);
 
 #if 0 
   // Load the environment model
@@ -88,8 +91,8 @@ int main(int argc, char *argv[]) {
   simulation();
 
   // Set the camera position
-  camera.set_pos (5, 5, 5);
-  camera.look_at (0, 0, 1);
+  camera.set_pos (1, 1, 1);
+  camera.look_at (0, 0, 0);
  
   // This is a simpler way to do stuff every frame,
   // if you're too lazy to create a task.
@@ -112,12 +115,6 @@ void simulation(){
   cube.set_pos(0, 0, 0);
 #endif
  
-  // Load the smiley model which will act as our iron ball
-  sphere = window->load_model(framework.get_models(), "models/box");
-  sphere.set_pos(-.5, -.5, -.5);
-  sphere.reparent_to(window->get_render());
-  sphere.set_scale(0.25, 0.02, 0.25);
-  
   // Setup our physics world and the body
   world.set_gravity( 0 , 0, -9.81 );
   world.init_surface_table(1);
@@ -138,24 +135,7 @@ void simulation(){
   contactgroup = new OdeJointGroup();
   space->set_auto_collide_joint_group(*contactgroup);
 
-  cyl = window->load_model(framework.get_models(), "models/smiley");
-  cyl.reparent_to(window->get_render());
-  cylBody = new OdeBody(world);
-  OdeMass M = OdeMass();
-  M.set_box(1, 1, 1, 1);
-  cylBody->set_mass(M);
-  cylBody->set_position(1, 0, 1.5);
 
-  OdeGeom* geom;
-  geom = new OdeCylinderGeom(
-      *space, 1, 1);
-  LQuaternionf q;
-  q.set_from_axis_angle(90, LVector3f(1, 0, 0));
-  geom->set_collide_bits(0xFF);
-  geom->set_category_bits(0);
-  geom->set_body(*cylBody);
-  geom->set_offset_quaternion(q);
- 
   /* Create the body */
 #if 0
   body = new OdeBody(world);
@@ -169,7 +149,7 @@ void simulation(){
   boxGeom->set_category_bits(0x01);
   boxGeom->set_body(*body);
 #endif
-  body = build_faceplate1(&world, space, 0, 0, 2, sphere.get_quat(window->get_render()));
+  mobot->build_faceplate1(&world, space, 0, 0, 2, sphere.get_quat(window->get_render()));
 
   /* Create ground plane */
   CardMaker* cm = new CardMaker("ground");
@@ -203,10 +183,8 @@ AsyncTask::DoneStatus simulationTask (GenericAsyncTask* task, void* data) {
     world.quick_step(stepSize);
   }
   // set the new positions
-  sphere.set_pos_quat(window->get_render(),
-    body->get_position(), body->get_quaternion());
-  cyl.set_pos_quat(window->get_render(),
-    cylBody->get_position(), cylBody->get_quaternion());
+  mobot->update();
+  camera.look_at(mobot->get_position(0));
 
   contactgroup->empty();
   return AsyncTask::DS_cont;
