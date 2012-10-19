@@ -14,14 +14,18 @@
 class MobotModel
 {
   public:
-    MobotModel(WindowFramework* window, PandaFramework* framework);
+    MobotModel(WindowFramework* window, PandaFramework* framework, OdeWorld* world, OdeSpace* space);
     ~MobotModel();
     void update();
-    void build_faceplate1(OdeWorld* world, OdeSpace* space, dReal x, dReal y, dReal z, LQuaternionf rot);
+    void build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot);
+    void build_body1(dReal x, dReal y, dReal z, LQuaternionf rot);
+    void build_center(dReal x, dReal y, dReal z, LQuaternionf rot);
     LVector3f get_position(int index);
   private:
     WindowFramework* _window;
     PandaFramework* _framework;
+    OdeWorld* _world;
+    OdeSpace* _space;
     OdeBody *_odeBodies[100];
     NodePath _nodePaths[100];
     int _numBodies;

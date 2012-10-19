@@ -14,13 +14,14 @@
 #define CENTER_Z .0509
 #define CENTER_X .0319
 // Corner Radius
-#define CENTER_R CENTER_Z/2.0
+#define CENTER_R (CENTER_Z/2.0)
 // Collision Category
 #define CENTER_CAT 0x04
 
 #define BODY_Z      .0510
 #define BODY_Y      .08565
 #define BODY_X      .0768
+#define BODY_CG_OFFSET 0.0122
 
 #define BODY_BOX1_X BODY_X
 #define BODY_BOX1_Y .0339
@@ -29,6 +30,10 @@
 #define BODY_BOX2_X .0366
 #define BODY_BOX2_Y (BODY_Y - BODY_BOX1_Y - BODY_CYL2_Y)
 #define BODY_BOX2_Z BODY_Z
+
+#define BODY_BOX3_X BODY_CYL2_X
+#define BODY_BOX3_Y BODY_BOX2_Y
+#define BODY_BOX3_Z BODY_Z
 
 #define BODY_CYL1_X BODY_BOX2_X
 #define BODY_CYL1_Y (BODY_Z/2.0)

@@ -71,7 +71,6 @@ int main(int argc, char *argv[]) {
   //window->setup_trackball();
   camera = window->get_camera_group(); // Get the camera and store it
 
-  mobot = new MobotModel(window, &framework);
 
 #if 0 
   // Load the environment model
@@ -135,7 +134,7 @@ void simulation(){
   contactgroup = new OdeJointGroup();
   space->set_auto_collide_joint_group(*contactgroup);
 
-
+  mobot = new MobotModel(window, &framework, &world, space);
   /* Create the body */
 #if 0
   body = new OdeBody(world);
@@ -149,7 +148,9 @@ void simulation(){
   boxGeom->set_category_bits(0x01);
   boxGeom->set_body(*body);
 #endif
-  mobot->build_faceplate1(&world, space, 0, 0, 2, sphere.get_quat(window->get_render()));
+  mobot->build_faceplate1(0, 0, 2, sphere.get_quat(window->get_render()));
+  mobot->build_body1(0, 0, 3, sphere.get_quat(window->get_render()));
+  mobot->build_center(0, 0, 4, sphere.get_quat(window->get_render()));
 
   /* Create ground plane */
   CardMaker* cm = new CardMaker("ground");
@@ -184,6 +185,7 @@ AsyncTask::DoneStatus simulationTask (GenericAsyncTask* task, void* data) {
   }
   // set the new positions
   mobot->update();
+  camera.set_pos(mobot->get_position(0) + LVector3f(1, 1, 1));
   camera.look_at(mobot->get_position(0));
 
   contactgroup->empty();
