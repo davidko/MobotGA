@@ -40,6 +40,7 @@ float deltaTimeAccumulator = 0.0f;
  
 // This stepSize makes the simulation run at 90 frames per second
 float stepSize = 1.0f / 90.0f;
+//float stepSize = 0.05;
 WindowFramework *window;
 PandaFramework framework;
  
@@ -115,18 +116,19 @@ void simulation(){
 #endif
  
   // Setup our physics world and the body
-  world.set_gravity( 0 , 0, -9.81 );
+  world.set_gravity( 0 , 0, -.81 );
   world.init_surface_table(1);
   world.set_surface_entry(
       0,  // id 1
       0,  // id 2
       150, // mu
-      0.9, // bounce
-      900.1, //bounce_vel
+      0.0, // bounce
+      9.1, //bounce_vel
       0.9, //soft_erp
       0.00001,  //soft_cfm
       0.0,  //slip
-      0.002); //dampen
+      0.02); //dampen
+  world.set_contact_surface_layer(0.001);
 
   // Setup our contact space, etc.
   space = new OdeSimpleSpace();
@@ -148,9 +150,12 @@ void simulation(){
   boxGeom->set_category_bits(0x01);
   boxGeom->set_body(*body);
 #endif
-  mobot->build_faceplate1(0, 0, 2, sphere.get_quat(window->get_render()));
-  mobot->build_body1(0, 0, 3, sphere.get_quat(window->get_render()));
-  mobot->build_center(0, 0, 4, sphere.get_quat(window->get_render()));
+  LQuaternionf q;
+  q.set_from_axis_angle(0, LVector3f(1, 0, 0));
+  mobot->build_mobot(0, 0, 0.3, q);
+  //mobot->build_faceplate1(0, 0, 0.3, q);
+  //mobot->build_body1(0, 0, .3, q );
+  //mobot->build_center(0, 0, 4, sphere.get_quat(window->get_render()));
 
   /* Create ground plane */
   CardMaker* cm = new CardMaker("ground");
@@ -181,7 +186,7 @@ AsyncTask::DoneStatus simulationTask (GenericAsyncTask* task, void* data) {
     // the accumulated time is less than the stepsize
     deltaTimeAccumulator -= stepSize;
     // Step the simulation
-    world.quick_step(stepSize);
+    world.step(stepSize);
   }
   // set the new positions
   mobot->update();

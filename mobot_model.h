@@ -20,6 +20,7 @@ class MobotModel
     void build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot);
     void build_body1(dReal x, dReal y, dReal z, LQuaternionf rot);
     void build_center(dReal x, dReal y, dReal z, LQuaternionf rot);
+    void build_mobot(dReal x, dReal y, dReal z, LQuaternionf rot);
     LVector3f get_position(int index);
   private:
     WindowFramework* _window;

@@ -56,4 +56,6 @@
 
 #define GROUND_CAT 0x20
 
+#define DELTA 0.001
+
 #endif

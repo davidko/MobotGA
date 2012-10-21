@@ -1,4 +1,5 @@
 #include "mobot_model.h"
+#include "odeHingeJoint.h"
 
 MobotModel::MobotModel(WindowFramework* window, PandaFramework* framework, OdeWorld* world, OdeSpace* space)
 {
@@ -30,6 +31,8 @@ void MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot)
   /* Create the nodepath */
   NodePath node = _window->load_model(_framework->get_models(), "models/box");
   node.reparent_to(_window->get_render());
+  node.set_pos(-0.5, -0.5, -0.5);
+  node.flatten_light();
   //node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
   node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
   OdeBody *body = new OdeBody(*_world);
@@ -41,10 +44,19 @@ void MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot)
   
   /* Set up the collision geometry */
   OdeGeom* geom;
+  /* Simple box */
+  geom = new OdeBoxGeom(*_space, 
+      FACEPLATE_X,
+      FACEPLATE_Y*.5,
+      FACEPLATE_Z);
+  geom->set_collide_bits(0xFF & (~FACEPLATE1_CAT));
+  geom->set_category_bits(FACEPLATE1_CAT);
+  geom->set_body(*body);
+#if 0
   /* Box 1 */
   geom = new OdeBoxGeom(*_space, 
       FACEPLATE_X - (2.0*FACEPLATE_R),
-      FACEPLATE_Y,
+      FACEPLATE_Y*2,
       FACEPLATE_Z);
   geom->set_collide_bits(0xFF & (~FACEPLATE1_CAT));
   geom->set_category_bits(FACEPLATE1_CAT);
@@ -53,7 +65,7 @@ void MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot)
   /* Box 2 */
   geom = new OdeBoxGeom(*_space, 
       FACEPLATE_R,
-      FACEPLATE_Y,
+      FACEPLATE_Y*0.95,
       FACEPLATE_Z - (2.0*FACEPLATE_R));
   geom->set_collide_bits(0xFF & (~FACEPLATE1_CAT));
   geom->set_category_bits(FACEPLATE1_CAT);
@@ -66,7 +78,7 @@ void MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot)
   /* Box 3 */
   geom = new OdeBoxGeom(*_space, 
       FACEPLATE_R,
-      FACEPLATE_Y,
+      FACEPLATE_Y*0.95,
       FACEPLATE_Z - (2.0*FACEPLATE_R));
   geom->set_collide_bits(0xFF & (~FACEPLATE1_CAT));
   geom->set_category_bits(FACEPLATE1_CAT);
@@ -77,7 +89,7 @@ void MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot)
       0);
 
   /* Cylinder 4 */
-  geom = new OdeCylinderGeom(*_space, FACEPLATE_R*1.01, FACEPLATE_Y*.99);
+  geom = new OdeCylinderGeom(*_space, FACEPLATE_R*0.8, FACEPLATE_Y*.5);
   geom->set_collide_bits(0xFF & (~FACEPLATE1_CAT));
   geom->set_category_bits(FACEPLATE1_CAT);
   geom->set_body(*body);
@@ -90,7 +102,7 @@ void MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot)
       0);
 
   /* Cylinder 5 */
-  geom = new OdeCylinderGeom(*_space, FACEPLATE_R*1.01, FACEPLATE_Y*.99);
+  geom = new OdeCylinderGeom(*_space, FACEPLATE_R*.8, FACEPLATE_Y*.5);
   geom->set_collide_bits(0xFF & (~FACEPLATE1_CAT));
   geom->set_category_bits(FACEPLATE1_CAT);
   geom->set_body(*body);
@@ -102,7 +114,7 @@ void MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot)
       0);
 
   /* Cylinder 6 */
-  geom = new OdeCylinderGeom(*_space, FACEPLATE_R*1.01, FACEPLATE_Y*.99);
+  geom = new OdeCylinderGeom(*_space, FACEPLATE_R*.8, FACEPLATE_Y*.5);
   geom->set_collide_bits(0xFF & (~FACEPLATE1_CAT));
   geom->set_category_bits(FACEPLATE1_CAT);
   geom->set_body(*body);
@@ -114,7 +126,7 @@ void MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot)
       0);
 
   /* Cylinder 7 */
-  geom = new OdeCylinderGeom(*_space, FACEPLATE_R*1.01, FACEPLATE_Y*1.01);
+  geom = new OdeCylinderGeom(*_space, FACEPLATE_R*.8, FACEPLATE_Y*.5);
   geom->set_collide_bits(0xFF & (~FACEPLATE1_CAT));
   geom->set_category_bits(FACEPLATE1_CAT);
   geom->set_body(*body);
@@ -124,6 +136,7 @@ void MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot)
       +(FACEPLATE_X/2.0) - FACEPLATE_R,
       -FACEPLATE_Z/2.0 + FACEPLATE_R,
       0);
+#endif
 
   _odeBodies[_numBodies] = body;
   _nodePaths[_numBodies] = node;
@@ -136,6 +149,8 @@ void MobotModel::build_body1(dReal x, dReal y, dReal z, LQuaternionf rot)
   NodePath node = _window->load_model(_framework->get_models(), "models/box");
   node.reparent_to(_window->get_render());
   //node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
+  node.set_pos(-0.5, -0.5, -0.5);
+  node.flatten_light();
   node.set_scale(BODY_X, BODY_Y, BODY_Z);
   OdeBody *body = new OdeBody(*_world);
   OdeMass M = OdeMass();
@@ -222,6 +237,8 @@ void MobotModel::build_center(dReal x, dReal y, dReal z, LQuaternionf rot)
   NodePath node = _window->load_model(_framework->get_models(), "models/box");
   node.reparent_to(_window->get_render());
   //node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
+  node.set_pos(-0.5, -0.5, -0.5);
+  node.flatten_light();
   node.set_scale(CENTER_X, CENTER_Y, CENTER_Z);
   OdeBody *body = new OdeBody(*_world);
   OdeMass M = OdeMass();
@@ -278,6 +295,23 @@ void MobotModel::build_center(dReal x, dReal y, dReal z, LQuaternionf rot)
   _odeBodies[_numBodies] = body;
   _nodePaths[_numBodies] = node;
   _numBodies++;
+}
+
+void MobotModel::build_mobot(dReal x, dReal y, dReal z, LQuaternionf rot)
+{
+  build_faceplate1(0, 0, 0, LQuaternionf(1, 0, 0, 0));
+  build_body1(
+      -((BODY_X/2.0) - (BODY_BOX2_X-BODY_CG_OFFSET)),
+      FACEPLATE_Y/2.0 + BODY_BOX1_Y + DELTA,
+      0,
+      LQuaternionf(1, 0, 0, 0));
+  OdeHingeJoint* joint = new OdeHingeJoint(*_world);
+  joint->attach_bodies(*_odeBodies[0], *_odeBodies[1]);
+  joint->set_anchor(
+      0,
+      (FACEPLATE_Y/2.0) + DELTA/2.0,
+      0);
+  joint->set_axis(0, 1, 0);
 }
 
 LVector3f MobotModel::get_position(int index)
