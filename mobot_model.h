@@ -6,6 +6,9 @@
 #include "pandaSystem.h"
 #include "mobot_specs.h"
 
+#define RAD2DEG(x) ((x)*180.0/M_PI)
+#define DEG2RAD(x) ((x)*M_PI/180.0)
+
 class MobotModel
 {
   public:

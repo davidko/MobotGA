@@ -54,92 +54,75 @@ void MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot)
   /* Set up the collision geometry */
   dGeomID geom;
   /* Simple box */
+  /*
   geom = dCreateBox(_space, 
       FACEPLATE_X,
       FACEPLATE_Y,
       FACEPLATE_Z);
   dGeomSetBody(geom, body);
+  */
 
-  dReal quat[4];
-  quat[0] = rot.get_r();
-  quat[1] = rot.get_i();
-  quat[2] = rot.get_j();
-  quat[3] = rot.get_k();
-  dBodySetQuaternion(body, quat);
-  
-#if 0
   /* Box 1 */
-  geom = new OdeBoxGeom(*_space, 
+  geom = dCreateBox(_space, 
       FACEPLATE_X - (2.0*FACEPLATE_R),
       FACEPLATE_Y*2,
       FACEPLATE_Z);
-  geom->set_collide_bits(0xFF & (~FACEPLATE1_CAT));
-  geom->set_category_bits(FACEPLATE1_CAT);
-  geom->set_body(*body);
+  dGeomSetBody(geom, body);
 
   /* Box 2 */
-  geom = new OdeBoxGeom(*_space, 
+  geom = dCreateBox(_space, 
       FACEPLATE_R,
       FACEPLATE_Y*0.95,
       FACEPLATE_Z - (2.0*FACEPLATE_R));
-  geom->set_collide_bits(0xFF & (~FACEPLATE1_CAT));
-  geom->set_category_bits(FACEPLATE1_CAT);
-  geom->set_body(*body);
-  geom->set_offset_position(
+  dGeomSetBody(geom, body);
+  dGeomSetOffsetPosition(geom, 
       -(FACEPLATE_X - (2.0*FACEPLATE_R))/2.0 - FACEPLATE_R/2.0,
       0,
       0);
       
   /* Box 3 */
-  geom = new OdeBoxGeom(*_space, 
+  geom = dCreateBox(_space, 
       FACEPLATE_R,
       FACEPLATE_Y*0.95,
       FACEPLATE_Z - (2.0*FACEPLATE_R));
-  geom->set_collide_bits(0xFF & (~FACEPLATE1_CAT));
-  geom->set_category_bits(FACEPLATE1_CAT);
-  geom->set_body(*body);
-  geom->set_offset_position(
+  dGeomSetBody(geom, body);
+  dGeomSetOffsetPosition(geom, 
       (FACEPLATE_X - (2.0*FACEPLATE_R))/2.0 + FACEPLATE_R/2.0,
       0,
       0);
 
   /* Cylinder 4 */
-  geom = new OdeCylinderGeom(*_space, FACEPLATE_R*0.8, FACEPLATE_Y*.5);
-  geom->set_collide_bits(0xFF & (~FACEPLATE1_CAT));
-  geom->set_category_bits(FACEPLATE1_CAT);
-  geom->set_body(*body);
-  LQuaternionf q;
-  q.set_from_axis_angle(90, LVector3f(1, 0, 0));
-  geom->set_offset_quaternion(q);
-  geom->set_offset_position(
+  geom = dCreateCylinder(_space, FACEPLATE_R*0.8, FACEPLATE_Y*0.9);
+  dGeomSetBody(geom, body);
+  dQuaternion q;
+  dQFromAxisAndAngle(q, 1, 0, 0, DEG2RAD(90));
+  dGeomSetOffsetQuaternion(geom, q);
+  dGeomSetOffsetPosition(geom,
       -(FACEPLATE_X/2.0) + FACEPLATE_R,
       FACEPLATE_Z/2.0 - FACEPLATE_R,
       0);
 
   /* Cylinder 5 */
-  geom = new OdeCylinderGeom(*_space, FACEPLATE_R*.8, FACEPLATE_Y*.5);
-  geom->set_collide_bits(0xFF & (~FACEPLATE1_CAT));
-  geom->set_category_bits(FACEPLATE1_CAT);
-  geom->set_body(*body);
-  q.set_from_axis_angle(90, LVector3f(1, 0, 0));
-  geom->set_offset_quaternion(q);
-  geom->set_offset_position(
+  geom = dCreateCylinder(_space, FACEPLATE_R*.8, FACEPLATE_Y*.9);
+  dGeomSetBody(geom, body);
+  dQFromAxisAndAngle(q, 1, 0, 0, DEG2RAD(90));
+  dGeomSetOffsetQuaternion(geom, q);
+  dGeomSetOffsetPosition(geom,
       (FACEPLATE_X/2.0) - FACEPLATE_R,
       FACEPLATE_Z/2.0 - FACEPLATE_R,
       0);
 
   /* Cylinder 6 */
-  geom = new OdeCylinderGeom(*_space, FACEPLATE_R*.8, FACEPLATE_Y*.5);
-  geom->set_collide_bits(0xFF & (~FACEPLATE1_CAT));
-  geom->set_category_bits(FACEPLATE1_CAT);
-  geom->set_body(*body);
-  q.set_from_axis_angle(90, LVector3f(1, 0, 0));
-  geom->set_offset_quaternion(q);
-  geom->set_offset_position(
+  geom = dCreateCylinder(_space, FACEPLATE_R*.8, FACEPLATE_Y*.9);
+  dGeomSetBody(geom, body);
+  dQFromAxisAndAngle(q, 1, 0, 0, DEG2RAD(90));
+  dGeomSetOffsetQuaternion(geom, q);
+  dGeomSetOffsetPosition(geom,
       -(FACEPLATE_X/2.0) + FACEPLATE_R,
       -FACEPLATE_Z/2.0 + FACEPLATE_R,
       0);
 
+#if 0
   /* Cylinder 7 */
   geom = new OdeCylinderGeom(*_space, FACEPLATE_R*.8, FACEPLATE_Y*.5);
   geom->set_collide_bits(0xFF & (~FACEPLATE1_CAT));
@@ -153,6 +136,13 @@ void MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot)
       0);
 #endif
 
+  dReal quat[4];
+  quat[0] = rot.get_r();
+  quat[1] = rot.get_i();
+  quat[2] = rot.get_j();
+  quat[3] = rot.get_k();
+  dBodySetQuaternion(body, quat);
+  
   _odeBodies[_numBodies] = body;
   _nodePaths[_numBodies] = node;
   _numBodies++;
