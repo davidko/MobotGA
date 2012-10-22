@@ -1,38 +1,25 @@
 #include <iostream>
 #include <algorithm>
+#include <ode/ode.h>
 #include "pandaFramework.h"
 #include "pandaSystem.h"
- 
-#include "genericAsyncTask.h"
-#include "asyncTaskManager.h"
- 
 #include "cIntervalManager.h"
-#include "cLerpNodePathInterval.h"
-#include "cMetaInterval.h"
-
-#include "odeWorld.h"
-#include "odeBody.h"
-#include "odeMass.h"
-#include "odeSimpleSpace.h"
-#include "odeBoxGeom.h"
-#include "cardMaker.h"
-#include "odePlaneGeom.h"
-
 #include "mobot_model.h"
-
 using namespace std;
 
+#define MAX_CONTACTS 8          // maximum number of contact points per body
 // Global stuff
  
-OdeBody *body;
-OdeWorld world;
+dWorldID world;
+dSpaceID space;
 NodePath sphere;
 NodePath cyl;
-OdeBody *cylBody;
-OdeSimpleSpace* space;
-OdeJointGroup* contactgroup;
+dBodyID body;
+    dGeomID geom;
+dJointGroupID contactgroup;
 MobotModel* mobot;
 PT(ClockObject) globalClock = ClockObject::get_global_clock();
+int init = 1;
  
 // Create an accumulator to track the time since the sim
 // has been running
@@ -51,6 +38,37 @@ void simulation();
 PT(AsyncTaskManager) taskMgr = AsyncTaskManager::get_global_ptr(); 
 NodePath camera;
  
+static void nearCallback (void *data, dGeomID o1, dGeomID o2)
+{
+  int i;
+  // if (o1->body && o2->body) return;
+
+  // exit without doing anything if the two bodies are connected by a joint
+  dBodyID b1 = dGeomGetBody(o1);
+  dBodyID b2 = dGeomGetBody(o2);
+  if (b1 && b2 && dAreConnectedExcluding (b1,b2,dJointTypeContact)) return;
+
+  dContact contact[MAX_CONTACTS];   // up to MAX_CONTACTS contacts per box-box
+  for (i=0; i<MAX_CONTACTS; i++) {
+    contact[i].surface.mode = dContactBounce | dContactSoftCFM;
+    contact[i].surface.mu = dInfinity;
+    contact[i].surface.mu2 = 0;
+    contact[i].surface.bounce = 0.1;
+    contact[i].surface.bounce_vel = 0.1;
+    contact[i].surface.soft_cfm = 0.01;
+  }
+  if (int numc = dCollide (o1,o2,MAX_CONTACTS,&contact[0].geom,
+        sizeof(dContact))) {
+    dMatrix3 RI;
+    dRSetIdentity (RI);
+    const dReal ss[3] = {0.02,0.02,0.02};
+    for (i=0; i<numc; i++) {
+      dJointID c = dJointCreateContact (world,contactgroup,contact+i);
+      dJointAttach (c,b1,b2);
+    }
+  }
+}
+
 // Task to move the camera
 AsyncTask::DoneStatus SpinCameraTask(GenericAsyncTask* task, void* data) {
   double time = globalClock->get_real_time();
@@ -114,29 +132,36 @@ void simulation(){
   cube.set_scale(0.25, 0.25, 0.25);
   cube.set_pos(0, 0, 0);
 #endif
+
+  // create world
+  dInitODE();
+  dAllocateODEDataForThread(dAllocateMaskAll);
+  world = dWorldCreate();
+  //space = dHashSpaceCreate (0);
+  space = dSimpleSpaceCreate(0);
+  contactgroup = dJointGroupCreate (0);
  
   // Setup our physics world and the body
-  world.set_gravity( 0 , 0, -.81 );
-  world.init_surface_table(1);
-  world.set_surface_entry(
-      0,  // id 1
-      0,  // id 2
-      150, // mu
-      0.0, // bounce
-      9.1, //bounce_vel
-      0.9, //soft_erp
-      0.00001,  //soft_cfm
-      0.0,  //slip
-      0.02); //dampen
-  world.set_contact_surface_layer(0.001);
+  dWorldSetGravity(world, 0 , 0, -9.81 );
+  dWorldSetCFM (world,1e-5);
+  dWorldSetAutoDisableFlag (world,1);
 
-  // Setup our contact space, etc.
-  space = new OdeSimpleSpace();
-  space->set_auto_collide_world(world);
-  contactgroup = new OdeJointGroup();
-  space->set_auto_collide_joint_group(*contactgroup);
+#if 1
 
-  mobot = new MobotModel(window, &framework, &world, space);
+  dWorldSetAutoDisableAverageSamplesCount( world, 10 );
+
+#endif
+
+  dWorldSetLinearDamping(world, 0.00001);
+  dWorldSetAngularDamping(world, 0.005);
+  dWorldSetMaxAngularSpeed(world, 200);
+
+  dWorldSetContactMaxCorrectingVel (world,0.1);
+  dWorldSetContactSurfaceLayer (world,0.001);
+  dCreatePlane (space,0,0,1,0);
+  dSpaceCollide (space,0,&nearCallback);
+
+  mobot = new MobotModel(window, &framework, world, space);
   /* Create the body */
 #if 0
   body = new OdeBody(world);
@@ -151,23 +176,12 @@ void simulation(){
   boxGeom->set_body(*body);
 #endif
   LQuaternionf q;
-  q.set_from_axis_angle(0, LVector3f(1, 0, 0));
-  mobot->build_mobot(0, 0, 0.3, q);
-  //mobot->build_faceplate1(0, 0, 0.3, q);
+  q.set_from_axis_angle(45, LVector3f(1, 0, 0));
+  //mobot->build_mobot(0, 0, 0.3, q);
+  mobot->build_faceplate1(0, 0, 0.3, q);
   //mobot->build_body1(0, 0, .3, q );
   //mobot->build_center(0, 0, 4, sphere.get_quat(window->get_render()));
 
-  /* Create ground plane */
-  CardMaker* cm = new CardMaker("ground");
-  cm->set_frame(-20, 20, -20, 20);
-  //cm->set_frame(-1, 1, -1, 1);
-  NodePath ground = window->get_render().attach_new_node(cm->generate());
-  ground.set_pos(0,0,0); ground.look_at(0, 0, -1);
-  OdePlaneGeom* groundGeom = new OdePlaneGeom(*space, (dReal)0, (dReal)0, (dReal)1, (dReal)0);
-  groundGeom->set_collide_bits(0xFF);
-  groundGeom->set_category_bits(0x20);
-
- 
   PT(GenericAsyncTask) simulationTaskObject =
     new GenericAsyncTask("startup task", &simulationTask, (void*) NULL);
   simulationTaskObject->set_delay(2);
@@ -176,7 +190,11 @@ void simulation(){
  
 // The task for our simulation
 AsyncTask::DoneStatus simulationTask (GenericAsyncTask* task, void* data) {
-  space->auto_collide();
+  if(init) {
+    dAllocateODEDataForThread(dAllocateMaskAll);
+    init = 0;
+  }
+  printf(".\n");
   // Set the force on the body to push it off the ridge
   //body->set_force(0, min(pow(task->get_elapsed_time(),4.0) * 500000 - 500000, 0.0), 0);
   // Add the deltaTime for the task to the accumulator
@@ -186,13 +204,16 @@ AsyncTask::DoneStatus simulationTask (GenericAsyncTask* task, void* data) {
     // the accumulated time is less than the stepsize
     deltaTimeAccumulator -= stepSize;
     // Step the simulation
-    world.step(stepSize);
+    dSpaceCollide (space,0,&nearCallback);
+    dWorldStep(world, stepSize);
+    //world.step(stepSize);
+    dJointGroupEmpty(contactgroup);
   }
   // set the new positions
   mobot->update();
-  camera.set_pos(mobot->get_position(0) + LVector3f(1, 1, 1));
-  camera.look_at(mobot->get_position(0));
+  const dReal *pos = mobot->get_position(0);
+  camera.set_pos(LVector3f(pos[0], pos[1], pos[2]) + LVector3f(1, 1, 1));
+  camera.look_at(LVector3f(pos[0], pos[1], pos[2]));
 
-  contactgroup->empty();
   return AsyncTask::DS_cont;
 }
