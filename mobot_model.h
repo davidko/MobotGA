@@ -15,6 +15,7 @@ class MobotModel
     MobotModel(WindowFramework* window, PandaFramework* framework, dWorldID world, dSpaceID space);
     ~MobotModel();
     void update();
+    void step();
     dBodyID build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot);
     dBodyID build_body1(dReal x, dReal y, dReal z, LQuaternionf rot);
     dBodyID build_body2(dReal x, dReal y, dReal z, LQuaternionf rot);
@@ -28,7 +29,11 @@ class MobotModel
     dSpaceID _space;
     dBodyID _odeBodies[100];
     NodePath _nodePaths[100];
+    dJointID _joints[10];
+    dReal _damping;
+    dReal _maxTorque;
     int _numBodies;
+    dReal _desiredAngles[4];
 };
 
 

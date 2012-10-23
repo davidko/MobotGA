@@ -205,6 +205,7 @@ AsyncTask::DoneStatus simulationTask (GenericAsyncTask* task, void* data) {
     // Step the simulation
     dSpaceCollide (space,0,&nearCallback);
     dWorldStep(world, stepSize);
+    mobot->step();
     //world.step(stepSize);
     dJointGroupEmpty(contactgroup);
   }

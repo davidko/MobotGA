@@ -8,6 +8,12 @@ MobotModel::MobotModel(WindowFramework* window, PandaFramework* framework, dWorl
   _world = world;
   _space = space;
   _numBodies = 0;
+  _damping = 0.00000022477;
+  _maxTorque = 0.000001;
+  _desiredAngles[0] = DEG2RAD(45);
+  _desiredAngles[1] = DEG2RAD(45);
+  _desiredAngles[2] = DEG2RAD(45);
+  _desiredAngles[3] = DEG2RAD(45);
 }
 
 MobotModel::~MobotModel()
@@ -34,6 +40,23 @@ void MobotModel::update()
           quaternion[2], 
           quaternion[3])
         );
+  }
+}
+
+void MobotModel::step()
+{
+  /* Add damping forces */
+  int i;
+  dReal omega;
+  dReal err;
+  for(i = 0; i < 4; i++) {
+    omega = dJointGetHingeAngleRate(_joints[i]);
+    printf("%lf\n", omega);
+    dJointAddHingeTorque(_joints[i], -omega*_damping);
+    /* PID control */
+    err = _desiredAngles[i] - dJointGetHingeAngle(_joints[i]);
+    dJointSetHingeParam(_joints[i], dParamFMax, 0.01);
+    dJointSetHingeParam(_joints[i], dParamVel, err);
   }
 }
 
@@ -420,6 +443,7 @@ void MobotModel::build_mobot(dReal x, dReal y, dReal z, LQuaternionf rot)
       (FACEPLATE_Y/2.0),
       z);
   dJointSetHingeAxis(joint, 0, 1, 0);
+  _joints[0] = joint;
 
   /* Attach center to body */
   joint = dJointCreateHinge(_world, 0);
@@ -429,6 +453,7 @@ void MobotModel::build_mobot(dReal x, dReal y, dReal z, LQuaternionf rot)
       FACEPLATE_Y/2.0 + BODY_BOX1_Y + BODY_BOX2_Y,
       z);
   dJointSetHingeAxis(joint, 1, 0, 0);
+  _joints[1] = joint;
 
   /* Attach center to body2 */
   joint = dJointCreateHinge(_world, 0);
@@ -438,6 +463,7 @@ void MobotModel::build_mobot(dReal x, dReal y, dReal z, LQuaternionf rot)
       FACEPLATE_Y/2.0 + BODY_BOX1_Y + CENTER_Y - CENTER_R,
       z);
   dJointSetHingeAxis(joint, 1, 0, 0);
+  _joints[2] = joint;
 
   /* Attach last faceplate */
   joint = dJointCreateHinge(_world, 0);
@@ -447,7 +473,7 @@ void MobotModel::build_mobot(dReal x, dReal y, dReal z, LQuaternionf rot)
       FACEPLATE_Y/2.0 + BODY_Y*2.0,
       z);
   dJointSetHingeAxis(joint, 0, 1, 0);
-
+  _joints[3] = joint;
 }
 
 const dReal* MobotModel::get_position(int index)
