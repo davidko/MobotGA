@@ -176,7 +176,7 @@ void simulation(){
   boxGeom->set_body(*body);
 #endif
   LQuaternionf q;
-  q.set_from_axis_angle(45, LVector3f(1, 0, 0));
+  q.set_from_axis_angle(9, LVector3f(1, 0, 0));
   mobot->build_mobot(0, 0, 0.3, q);
   //mobot->build_faceplate1(0, 0, 0.3, q);
   //mobot->build_body1(0, 0, .3, q );
@@ -211,7 +211,11 @@ AsyncTask::DoneStatus simulationTask (GenericAsyncTask* task, void* data) {
   // set the new positions
   mobot->update();
   const dReal *pos = mobot->get_position(0);
-  camera.set_pos(LVector3f(pos[0], pos[1], pos[2]) + LVector3f(1, 1, 1));
+  double time = globalClock->get_real_time();
+  double angledegrees = time * 30.0;
+  double angleradians = angledegrees * (3.14 / 180.0);
+  camera.set_pos(sin(angleradians),cos(angleradians),1);
+  //camera.set_pos(LVector3f(pos[0], pos[1], pos[2]) + LVector3f(1, 1, 1));
   camera.look_at(LVector3f(pos[0], pos[1], pos[2]));
 
   return AsyncTask::DS_cont;

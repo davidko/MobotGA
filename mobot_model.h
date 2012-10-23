@@ -15,8 +15,8 @@ class MobotModel
     MobotModel(WindowFramework* window, PandaFramework* framework, dWorldID world, dSpaceID space);
     ~MobotModel();
     void update();
-    void build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot);
-    void build_body1(dReal x, dReal y, dReal z, LQuaternionf rot);
+    dBodyID build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot);
+    dBodyID build_body1(dReal x, dReal y, dReal z, LQuaternionf rot);
     void build_center(dReal x, dReal y, dReal z, LQuaternionf rot);
     void build_mobot(dReal x, dReal y, dReal z, LQuaternionf rot);
     const dReal* get_position(int index);
