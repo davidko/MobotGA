@@ -177,8 +177,8 @@ void simulation(){
 #endif
   LQuaternionf q;
   q.set_from_axis_angle(45, LVector3f(1, 0, 0));
-  //mobot->build_mobot(0, 0, 0.3, q);
-  mobot->build_faceplate1(0, 0, 0.3, q);
+  mobot->build_mobot(0, 0, 0.3, q);
+  //mobot->build_faceplate1(0, 0, 0.3, q);
   //mobot->build_body1(0, 0, .3, q );
   //mobot->build_center(0, 0, 4, sphere.get_quat(window->get_render()));
 

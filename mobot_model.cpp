@@ -146,7 +146,6 @@ void MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot)
 
 void MobotModel::build_body1(dReal x, dReal y, dReal z, LQuaternionf rot)
 {
-#if 0
   /* Create the nodepath */
   NodePath node = _window->load_model(_framework->get_models(), "models/box");
   node.reparent_to(_window->get_render());
@@ -154,29 +153,27 @@ void MobotModel::build_body1(dReal x, dReal y, dReal z, LQuaternionf rot)
   node.set_pos(-0.5, -0.5, -0.5);
   node.flatten_light();
   node.set_scale(BODY_X, BODY_Y, BODY_Z);
-  OdeBody *body = new OdeBody(*_world);
-  OdeMass M = OdeMass();
-  M.set_box(BODY_M, BODY_X, BODY_Y, BODY_Z);
-  body->set_mass(M);
-  body->set_position(x, y, z);
-  body->set_quaternion(rot);
 
-  /* Set up collision geometry */
-  OdeGeom* geom;
+  dBodyID body = dBodyCreate(_world);
+  dMass m;
+  dMassSetBox(&m, BODY_M, BODY_X, BODY_Y, BODY_Z);
+  dBodySetMass(body, &m);
+  dBodySetPosition(body, x, y, z);
+  /* Set up the collision geometry */
+  dGeomID geom;
 
   /* Box 1 */
-  geom = new OdeBoxGeom(*_space, 
+  geom = dCreateBox(_space, 
       BODY_BOX1_X,
       BODY_BOX1_Y,
       BODY_BOX1_Z);
-  geom->set_collide_bits(0xFF & (~BODY1_CAT));
-  geom->set_category_bits(BODY1_CAT);
-  geom->set_body(*body);
-  geom->set_offset_position(
+  dGeomSetBody(geom, body);
+  dGeomSetOffsetPosition(geom, 
       BODY_BOX1_X/2.0 - (BODY_BOX2_X-BODY_CG_OFFSET),
       -BODY_BOX1_Y/2.0,
       0);
 
+#if 0
   /* Box 2 */
   geom = new OdeBoxGeom(*_space, 
       BODY_BOX2_X,
@@ -304,7 +301,6 @@ void MobotModel::build_center(dReal x, dReal y, dReal z, LQuaternionf rot)
 
 void MobotModel::build_mobot(dReal x, dReal y, dReal z, LQuaternionf rot)
 {
-#if 0
   build_faceplate1(0, 0, 0, LQuaternionf(1, 0, 0, 0));
   build_body1(
       -((BODY_X/2.0) - (BODY_BOX2_X-BODY_CG_OFFSET)),
@@ -318,7 +314,6 @@ void MobotModel::build_mobot(dReal x, dReal y, dReal z, LQuaternionf rot)
       (FACEPLATE_Y/2.0) + DELTA/2.0,
       0);
   joint->set_axis(0, 1, 0);
-#endif
 }
 
 const dReal* MobotModel::get_position(int index)
