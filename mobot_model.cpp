@@ -235,6 +235,96 @@ dBodyID MobotModel::build_body1(dReal x, dReal y, dReal z, LQuaternionf rot)
   return body;
 }
 
+dBodyID MobotModel::build_body2(dReal x, dReal y, dReal z, LQuaternionf rot)
+{
+  /* Create the nodepath */
+  NodePath node = _window->load_model(_framework->get_models(), "models/box");
+  node.reparent_to(_window->get_render());
+  //node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
+  node.set_pos(-0.5, -0.5, -0.5);
+  node.flatten_light();
+  node.set_scale(BODY_X, BODY_Y, BODY_Z);
+  node.set_pos(
+      BODY_BOX1_X/2.0 - (BODY_BOX2_X-BODY_CG_OFFSET),
+      -(BODY_Y/2.0 - BODY_BOX1_Y), 
+      0);
+  node.flatten_light();
+
+  dBodyID body = dBodyCreate(_world);
+  dMass m;
+  dMassSetBox(&m, BODY_M, BODY_X, BODY_Y, BODY_Z);
+  dBodySetMass(body, &m);
+  dBodySetPosition(body, x, y, z);
+  /* Set up the collision geometry */
+  dGeomID geom;
+
+  /* Box 1 */
+  geom = dCreateBox(_space, 
+      BODY_BOX1_X,
+      BODY_BOX1_Y,
+      BODY_BOX1_Z);
+  dGeomSetBody(geom, body);
+  dGeomSetOffsetPosition(geom, 
+      BODY_BOX1_X/2.0 - (BODY_BOX2_X-BODY_CG_OFFSET),
+      BODY_BOX1_Y/2.0,
+      0);
+
+  /* Box 2 */
+  geom = dCreateBox(_space, 
+      BODY_BOX2_X,
+      BODY_BOX2_Y,
+      BODY_BOX2_Z);
+  dGeomSetBody(geom, body);
+  dGeomSetOffsetPosition(geom, 
+      BODY_BOX2_X-BODY_CG_OFFSET,
+      -BODY_BOX2_Y/2.0,
+      0);
+
+  /* Box 3 */
+  geom = dCreateBox(_space, 
+      BODY_BOX3_X,
+      BODY_BOX3_Y,
+      BODY_BOX3_Z);
+  dGeomSetBody(geom, body);
+  dGeomSetOffsetPosition(geom, 
+      (BODY_X - BODY_BOX3_X/2.0) - (BODY_BOX2_X-BODY_CG_OFFSET),
+      -BODY_BOX3_Y/2.0,
+      0);
+
+  /* Cylinder 1 */
+  geom = dCreateCylinder(_space, BODY_CYL1_R, BODY_CYL1_X*.99);
+  dGeomSetBody(geom, body);
+  dQuaternion q;
+  dQFromAxisAndAngle(q, 0, 1, 0, DEG2RAD(90));
+  dGeomSetOffsetQuaternion(geom, q);
+  dGeomSetOffsetPosition(geom, 
+      -(BODY_CYL1_X/2.0 - BODY_CG_OFFSET),
+      -BODY_BOX2_Y,
+      0);
+
+  /* Cylinder 2 */
+  geom = dCreateCylinder(_space, BODY_CYL1_R, BODY_CYL1_X*.99);
+  dGeomSetBody(geom, body);
+  dQFromAxisAndAngle(q, 0, 1, 0, DEG2RAD(90));
+  dGeomSetOffsetQuaternion(geom, q);
+  dGeomSetOffsetPosition(geom, 
+      BODY_X - BODY_CYL2_X/2.0 - (BODY_BOX2_X - BODY_CG_OFFSET),
+      -BODY_BOX3_Y,
+      0);
+
+  dReal quat[4];
+  quat[0] = rot.get_r();
+  quat[1] = rot.get_i();
+  quat[2] = rot.get_j();
+  quat[3] = rot.get_k();
+  dBodySetQuaternion(body, quat);
+  
+  _odeBodies[_numBodies] = body;
+  _nodePaths[_numBodies] = node;
+  _numBodies++;
+  return body;
+}
+
 dBodyID MobotModel::build_center(dReal x, dReal y, dReal z, LQuaternionf rot)
 {
   /* Create the nodepath */
@@ -266,7 +356,7 @@ dBodyID MobotModel::build_center(dReal x, dReal y, dReal z, LQuaternionf rot)
 
   /* Cyl 1 */
   geom = dCreateCylinder(_space,
-      CENTER_R,
+      CENTER_R*0.8,
       CENTER_X);
   dGeomSetBody(geom, body);
   dQuaternion q;
@@ -279,7 +369,7 @@ dBodyID MobotModel::build_center(dReal x, dReal y, dReal z, LQuaternionf rot)
 
   /* Cyl 1 */
   geom = dCreateCylinder(_space,
-      CENTER_R,
+      CENTER_R*0.8,
       CENTER_X);
   dGeomSetBody(geom, body);
   dQFromAxisAndAngle(q, 0, 1, 0, DEG2RAD(90));
@@ -298,7 +388,7 @@ dBodyID MobotModel::build_center(dReal x, dReal y, dReal z, LQuaternionf rot)
 
 void MobotModel::build_mobot(dReal x, dReal y, dReal z, LQuaternionf rot)
 {
-  dBodyID faceplate, body, center; 
+  dBodyID faceplate, body, center, body2, faceplate2; 
   faceplate = build_faceplate1(0, 0, z, LQuaternionf(1, 0, 0, 0));
   body = build_body1(
       -((BODY_X/2.0) - (BODY_BOX2_X-BODY_CG_OFFSET)),
@@ -308,6 +398,16 @@ void MobotModel::build_mobot(dReal x, dReal y, dReal z, LQuaternionf rot)
   center = build_center(
       CENTER_X/2.0,
       FACEPLATE_Y/2.0+BODY_BOX1_Y+CENTER_Y/2.0,
+      z,
+      LQuaternionf(1, 0, 0, 0));
+  body2 = build_body2(
+      -((BODY_X/2.0) - (BODY_BOX2_X-BODY_CG_OFFSET)),
+      FACEPLATE_Y/2.0+BODY_BOX1_Y+CENTER_Y,
+      z,
+      LQuaternionf(1, 0, 0, 0));
+  faceplate2 = build_faceplate1(
+      0,
+      FACEPLATE_Y + BODY_Y*2.0,
       z,
       LQuaternionf(1, 0, 0, 0));
 
@@ -329,6 +429,25 @@ void MobotModel::build_mobot(dReal x, dReal y, dReal z, LQuaternionf rot)
       FACEPLATE_Y/2.0 + BODY_BOX1_Y + BODY_BOX2_Y,
       z);
   dJointSetHingeAxis(joint, 1, 0, 0);
+
+  /* Attach center to body2 */
+  joint = dJointCreateHinge(_world, 0);
+  dJointAttach(joint, center, body2);
+  dJointSetHingeAnchor(joint,
+      0,
+      FACEPLATE_Y/2.0 + BODY_BOX1_Y + CENTER_Y - CENTER_R,
+      z);
+  dJointSetHingeAxis(joint, 1, 0, 0);
+
+  /* Attach last faceplate */
+  joint = dJointCreateHinge(_world, 0);
+  dJointAttach(joint, body2, faceplate2);
+  dJointSetHingeAnchor(joint,
+      0,
+      FACEPLATE_Y/2.0 + BODY_Y*2.0,
+      z);
+  dJointSetHingeAxis(joint, 0, 1, 0);
+
 }
 
 const dReal* MobotModel::get_position(int index)
