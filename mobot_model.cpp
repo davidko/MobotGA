@@ -65,7 +65,7 @@ void MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot)
   /* Box 1 */
   geom = dCreateBox(_space, 
       FACEPLATE_X - (2.0*FACEPLATE_R),
-      FACEPLATE_Y*2,
+      FACEPLATE_Y,
       FACEPLATE_Z);
   dGeomSetBody(geom, body);
 
@@ -99,8 +99,8 @@ void MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot)
   dGeomSetOffsetQuaternion(geom, q);
   dGeomSetOffsetPosition(geom,
       -(FACEPLATE_X/2.0) + FACEPLATE_R,
-      FACEPLATE_Z/2.0 - FACEPLATE_R,
-      0);
+      0,
+      FACEPLATE_Z/2.0 - FACEPLATE_R);
 
   /* Cylinder 5 */
   geom = dCreateCylinder(_space, FACEPLATE_R*.8, FACEPLATE_Y*.9);
@@ -109,18 +109,18 @@ void MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot)
   dGeomSetOffsetQuaternion(geom, q);
   dGeomSetOffsetPosition(geom,
       (FACEPLATE_X/2.0) - FACEPLATE_R,
-      FACEPLATE_Z/2.0 - FACEPLATE_R,
-      0);
+      0,
+      FACEPLATE_Z/2.0 - FACEPLATE_R);
 
   /* Cylinder 6 */
-  geom = dCreateCylinder(_space, FACEPLATE_R*.8, FACEPLATE_Y*.9);
+  geom = dCreateCylinder(_space, FACEPLATE_R*.8, FACEPLATE_Y*.8);
   dGeomSetBody(geom, body);
   dQFromAxisAndAngle(q, 1, 0, 0, DEG2RAD(90));
   dGeomSetOffsetQuaternion(geom, q);
   dGeomSetOffsetPosition(geom,
       -(FACEPLATE_X/2.0) + FACEPLATE_R,
-      -FACEPLATE_Z/2.0 + FACEPLATE_R,
-      0);
+      0,
+      -FACEPLATE_Z/2.0 + FACEPLATE_R);
 
 #if 0
   /* Cylinder 7 */

@@ -194,7 +194,6 @@ AsyncTask::DoneStatus simulationTask (GenericAsyncTask* task, void* data) {
     dAllocateODEDataForThread(dAllocateMaskAll);
     init = 0;
   }
-  printf(".\n");
   // Set the force on the body to push it off the ridge
   //body->set_force(0, min(pow(task->get_elapsed_time(),4.0) * 500000 - 500000, 0.0), 0);
   // Add the deltaTime for the task to the accumulator
