@@ -586,8 +586,6 @@ void MobotModel::build_mobot(dReal x, dReal y, dReal z, LQuaternionf rot)
   _joints[3] = joint;
 }
 
-
-
 const dReal* MobotModel::get_position(int index)
 {
   return dBodyGetPosition(_odeBodies[index]);
@@ -786,4 +784,70 @@ void MobotModel::attach_mobot(MobotModel* mobot)
   dJointAttach(joint, _odeBodies[3], mobot->_odeBodies[0]);
   dJointSetHingeAnchor(joint, pos[0], pos[1], pos[2]);
   dJointSetHingeAxis(joint, 0, 1, 0);
+}
+
+MobotChain::MobotChain(
+    WindowFramework* window,
+    PandaFramework* framework,
+    dWorldID world,
+    dSpaceID space,
+    int num_modules)
+{
+  if(num_modules < 1) {
+    return;
+  }
+  _window = window;
+  _framework = framework;
+  _world = world;
+  _space = space;
+  _numMobots = num_modules;
+  if(num_modules == 1) {
+    /* Just create one mobot */
+    _mobots[0] = new MobotModel(_window, _framework, _world, _space);
+    _mobots[0]->build_mobot(0, 0, 0, LQuaternionf(1, 0, 0, 0));
+    return;
+  }
+  /* If more than one, build a head module first */
+  _mobots[0] = new MobotModel(_window, _framework, _world, _space);
+  _mobots[0]->build_mobot_chain_head(0, 0, 0);
+  /* For each of the intermediate ones, build a body */
+  int i;
+  for(i = 1; i < _numMobots-1; i++) {
+    _mobots[i] = new MobotModel(_window, _framework, _world, _space);
+    _mobots[i]->build_mobot_chain_body(
+        0,
+        FACEPLATE_Y/2.0 + BODY_Y*2.0 + FACEPLATE_COMPOUND_Y/2.0 + 
+        (i-1)*(FACEPLATE_COMPOUND_Y + BODY_Y*2.0),
+        0);
+    _mobots[i-1]->attach_mobot(_mobots[i]);
+  }
+  /* Build last tail mobot */
+  _mobots[i] = new MobotModel(_window, _framework, _world, _space);
+  _mobots[i]->build_mobot_chain_tail(
+      0,
+      FACEPLATE_Y/2.0 + BODY_Y*2.0 + FACEPLATE_COMPOUND_Y/2.0 + 
+      (i-1)*(FACEPLATE_COMPOUND_Y + BODY_Y*2.0),
+      0);
+  _mobots[i-1]->attach_mobot(_mobots[i]);
+}
+
+MobotModel* MobotChain::mobot(int index)
+{
+  return _mobots[index];
+}
+
+void MobotChain::step()
+{
+  int i;
+  for(i = 0; i < _numMobots; i++) {
+    _mobots[i]->step();
+  }
+}
+
+void MobotChain::update()
+{
+  int i;
+  for(i = 0; i < _numMobots; i++) {
+    _mobots[i]->update();
+  }
 }

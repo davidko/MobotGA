@@ -18,6 +18,7 @@ dBodyID body;
     dGeomID geom;
 dJointGroupID contactgroup;
 MobotModel* mobot, *mobot2;
+MobotChain* chain;
 PT(ClockObject) globalClock = ClockObject::get_global_clock();
 int init = 1;
  
@@ -161,8 +162,8 @@ void simulation(){
   dCreatePlane (space,0,0,1,0);
   dSpaceCollide (space,0,&nearCallback);
 
-  mobot = new MobotModel(window, &framework, world, space);
-  mobot2 = new MobotModel(window, &framework, world, space);
+  //mobot = new MobotModel(window, &framework, world, space);
+  //mobot2 = new MobotModel(window, &framework, world, space);
   /* Create the body */
 #if 0
   body = new OdeBody(world);
@@ -176,11 +177,12 @@ void simulation(){
   boxGeom->set_category_bits(0x01);
   boxGeom->set_body(*body);
 #endif
+#if 0
   LQuaternionf q;
   q.set_from_axis_angle(9, LVector3f(1, 0, 0));
   //mobot->build_mobot(0, 0, 0.3, q);
   //mobot2->build_mobot(0.3, 0, 0.3, q);
-  mobot->build_mobot_chain_head(0, 0, 0.3);
+  //mobot->build_mobot_chain_head(0, 0, 0.3);
   mobot2->build_mobot_chain_tail(
       0.0, 
       FACEPLATE_Y/2.0 + BODY_Y*2.0 + FACEPLATE_COMPOUND_Y/2.0, 
@@ -189,6 +191,8 @@ void simulation(){
   //mobot->build_faceplate1(0, 0, 0.3, q);
   //mobot->build_body1(0, 0, .3, q );
   //mobot->build_center(0, 0, 4, sphere.get_quat(window->get_render()));
+#endif
+  chain = new MobotChain(window, &framework, world, space, 4);
 
   PT(GenericAsyncTask) simulationTaskObject =
     new GenericAsyncTask("startup task", &simulationTask, (void*) NULL);
@@ -213,14 +217,17 @@ AsyncTask::DoneStatus simulationTask (GenericAsyncTask* task, void* data) {
     // Step the simulation
     dSpaceCollide (space,0,&nearCallback);
     dWorldStep(world, stepSize);
-    mobot->step();
-    mobot2->step();
+    chain->step();
+    //mobot->step();
+    //mobot2->step();
     //world.step(stepSize);
     dJointGroupEmpty(contactgroup);
   }
   // set the new positions
-  mobot->update();
-  mobot2->update();
+  chain->update();
+  //mobot->update();
+  //mobot2->update();
+  mobot = chain->mobot(0);
   const dReal *pos = mobot->get_position(0);
   double time = globalClock->get_real_time();
   double angledegrees = time * 30.0;

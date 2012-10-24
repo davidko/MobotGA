@@ -41,5 +41,24 @@ class MobotModel
     dReal _desiredAngles[4];
 };
 
+class MobotChain
+{
+  public:
+    MobotChain(WindowFramework* window, 
+        PandaFramework* framework, 
+        dWorldID world, 
+        dSpaceID space, 
+        int num_modules);
+    MobotModel* mobot(int index);
+    void step();
+    void update();
+  private:
+    WindowFramework *_window;
+    PandaFramework* _framework;
+    dWorldID _world;
+    dSpaceID _space;
+    MobotModel* _mobots[30];
+    int _numMobots;
+};
 
 #endif
