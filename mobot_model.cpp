@@ -723,7 +723,7 @@ void MobotModel::build_mobot_chain_tail(dReal x, dReal y, dReal z)
       LQuaternionf(1, 0, 0, 0));
   faceplate2 = build_faceplate1(
       x,
-      y+FACEPLATE_COMPOUND_Y + BODY_Y*2.0,
+      y+FACEPLATE_COMPOUND_Y/2.0 + BODY_Y*2.0 + FACEPLATE_Y/2.0,
       z,
       LQuaternionf(1, 0, 0, 0));
 

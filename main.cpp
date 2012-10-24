@@ -183,9 +183,9 @@ void simulation(){
   mobot->build_mobot_chain_head(0, 0, 0.3);
   mobot2->build_mobot_chain_tail(
       0.0, 
-      0.3, 
+      FACEPLATE_Y/2.0 + BODY_Y*2.0 + FACEPLATE_COMPOUND_Y/2.0, 
       0.3);
-  //mobot->attach_mobot(mobot2);
+  mobot->attach_mobot(mobot2);
   //mobot->build_faceplate1(0, 0, 0.3, q);
   //mobot->build_body1(0, 0, .3, q );
   //mobot->build_center(0, 0, 4, sphere.get_quat(window->get_render()));
