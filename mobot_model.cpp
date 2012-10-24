@@ -701,38 +701,49 @@ void MobotModel::build_mobot_chain_body(dReal x, dReal y, dReal z)
 
 }
 
-/* Coordinates specify edge-center of the body */
+/* Coordinates specify CG of compound faceplate */
 void MobotModel::build_mobot_chain_tail(dReal x, dReal y, dReal z)
 {
-  dBodyID body, center, body2, faceplate2; 
+  dBodyID faceplate, body, center, body2, faceplate2; 
+  faceplate = build_big_faceplate(x, y, z, LQuaternionf(1, 0, 0, 0));
   body = build_body1(
       x-((BODY_X/2.0) - (BODY_BOX2_X-BODY_CG_OFFSET)),
-      y + BODY_BOX1_Y,
+      y+FACEPLATE_COMPOUND_Y/2.0 + BODY_BOX1_Y,
       z,
       LQuaternionf(1, 0, 0, 0));
   center = build_center(
       x+CENTER_X/2.0,
-      y+BODY_BOX1_Y+CENTER_Y/2.0,
+      y+FACEPLATE_COMPOUND_Y/2.0+BODY_BOX1_Y+CENTER_Y/2.0,
       z,
       LQuaternionf(1, 0, 0, 0));
   body2 = build_body2(
       x-((BODY_X/2.0) - (BODY_BOX2_X-BODY_CG_OFFSET)),
-      y+BODY_BOX1_Y+CENTER_Y,
+      y+FACEPLATE_COMPOUND_Y/2.0+BODY_BOX1_Y+CENTER_Y,
       z,
       LQuaternionf(1, 0, 0, 0));
   faceplate2 = build_faceplate1(
       x,
-      y+FACEPLATE_Y/2.0 + BODY_Y*2.0,
+      y+FACEPLATE_COMPOUND_Y + BODY_Y*2.0,
       z,
       LQuaternionf(1, 0, 0, 0));
 
-  /* Attach center to body */
+  /* Attach faceplate to body */
   dJointID joint;
+  joint = dJointCreateHinge(_world, 0);
+  dJointAttach(joint, faceplate, body);
+  dJointSetHingeAnchor(joint,
+      x,
+      y+(FACEPLATE_COMPOUND_Y/2.0),
+      z);
+  dJointSetHingeAxis(joint, 0, 1, 0);
+  _joints[0] = joint;
+
+  /* Attach center to body */
   joint = dJointCreateHinge(_world, 0);
   dJointAttach(joint, body, center);
   dJointSetHingeAnchor(joint,
       x,
-      y + BODY_BOX1_Y + BODY_BOX2_Y,
+      y+FACEPLATE_COMPOUND_Y/2.0 + BODY_BOX1_Y + BODY_BOX2_Y,
       z);
   dJointSetHingeAxis(joint, 1, 0, 0);
   _joints[1] = joint;
@@ -742,17 +753,17 @@ void MobotModel::build_mobot_chain_tail(dReal x, dReal y, dReal z)
   dJointAttach(joint, center, body2);
   dJointSetHingeAnchor(joint,
       x,
-      y + BODY_BOX1_Y + CENTER_Y - CENTER_R,
+      y+FACEPLATE_COMPOUND_Y/2.0 + BODY_BOX1_Y + CENTER_Y - CENTER_R,
       z);
   dJointSetHingeAxis(joint, 1, 0, 0);
   _joints[2] = joint;
 
-  /* Attach last faceplate */
+  /* Attach last faceplate to body2 */
   joint = dJointCreateHinge(_world, 0);
   dJointAttach(joint, body2, faceplate2);
   dJointSetHingeAnchor(joint,
       x,
-      y + BODY_Y*2.0,
+      y+FACEPLATE_COMPOUND_Y/2.0 + BODY_Y*2.0,
       z);
   dJointSetHingeAxis(joint, 0, 1, 0);
   _joints[3] = joint;
