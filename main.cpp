@@ -17,7 +17,7 @@ NodePath cyl;
 dBodyID body;
     dGeomID geom;
 dJointGroupID contactgroup;
-MobotModel* mobot;
+MobotModel* mobot, *mobot2;
 PT(ClockObject) globalClock = ClockObject::get_global_clock();
 int init = 1;
  
@@ -162,6 +162,7 @@ void simulation(){
   dSpaceCollide (space,0,&nearCallback);
 
   mobot = new MobotModel(window, &framework, world, space);
+  mobot2 = new MobotModel(window, &framework, world, space);
   /* Create the body */
 #if 0
   body = new OdeBody(world);
@@ -178,6 +179,7 @@ void simulation(){
   LQuaternionf q;
   q.set_from_axis_angle(9, LVector3f(1, 0, 0));
   mobot->build_mobot(0, 0, 0.3, q);
+  mobot2->build_mobot(0.3, 0, 0.3, q);
   //mobot->build_faceplate1(0, 0, 0.3, q);
   //mobot->build_body1(0, 0, .3, q );
   //mobot->build_center(0, 0, 4, sphere.get_quat(window->get_render()));
@@ -206,11 +208,13 @@ AsyncTask::DoneStatus simulationTask (GenericAsyncTask* task, void* data) {
     dSpaceCollide (space,0,&nearCallback);
     dWorldStep(world, stepSize);
     mobot->step();
+    mobot2->step();
     //world.step(stepSize);
     dJointGroupEmpty(contactgroup);
   }
   // set the new positions
   mobot->update();
+  mobot2->update();
   const dReal *pos = mobot->get_position(0);
   double time = globalClock->get_real_time();
   double angledegrees = time * 30.0;

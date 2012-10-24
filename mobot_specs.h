@@ -4,6 +4,7 @@
 #define FACEPLATE_Y .00845 
 #define FACEPLATE_Z .0763
 #define FACEPLATE_X FACEPLATE_Z
+#define FACEPLATE_COMPOUND_Y (FACEPLATE_Y*3.0)
 // Corner radius
 #define FACEPLATE_R .0254
 // Collision Category

@@ -17,10 +17,15 @@ class MobotModel
     void update();
     void step();
     dBodyID build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot);
+    dBodyID build_big_faceplate(dReal x, dReal y, dReal z, LQuaternionf rot);
     dBodyID build_body1(dReal x, dReal y, dReal z, LQuaternionf rot);
     dBodyID build_body2(dReal x, dReal y, dReal z, LQuaternionf rot);
     dBodyID build_center(dReal x, dReal y, dReal z, LQuaternionf rot);
     void build_mobot(dReal x, dReal y, dReal z, LQuaternionf rot);
+    void build_mobot_chain_head(dReal x, dReal y, dReal z);
+    void build_mobot_chain_body(dReal x, dReal y, dReal z);
+    void build_mobot_chain_tail(dReal x, dReal y, dReal z);
+    void attach_mobot(MobotModel* mobot);
     const dReal* get_position(int index);
   private:
     WindowFramework* _window;
