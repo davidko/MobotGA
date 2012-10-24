@@ -49,6 +49,7 @@ void MobotModel::step()
   int i;
   dReal omega;
   dReal err;
+#if 0
   for(i = 0; i < 4; i++) {
     omega = dJointGetHingeAngleRate(_joints[i]);
     printf("%lf\n", omega);
@@ -58,6 +59,7 @@ void MobotModel::step()
     dJointSetHingeParam(_joints[i], dParamFMax, 0.01);
     dJointSetHingeParam(_joints[i], dParamVel, err);
   }
+#endif
 }
 
 dBodyID MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot)
