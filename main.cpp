@@ -51,12 +51,16 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 
   dContact contact[MAX_CONTACTS];   // up to MAX_CONTACTS contacts per box-box
   for (i=0; i<MAX_CONTACTS; i++) {
-    contact[i].surface.mode = dContactBounce | dContactSoftCFM;
-    contact[i].surface.mu = dInfinity;
+    //contact[i].surface.mode = dContactBounce | dContactSoftCFM | dContactSlip1 | dContactSlip2;
+    contact[i].surface.mode = dContactBounce | dContactSoftCFM ;
+    //contact[i].surface.mu = dInfinity;
+    contact[i].surface.mu = 0;
     contact[i].surface.mu2 = 0;
     contact[i].surface.bounce = 0.1;
     contact[i].surface.bounce_vel = 0.1;
     contact[i].surface.soft_cfm = 0.01;
+    contact[i].surface.slip1 = 0.5;
+    contact[i].surface.slip2 = 0.5;
   }
   if (int numc = dCollide (o1,o2,MAX_CONTACTS,&contact[0].geom,
         sizeof(dContact))) {
@@ -108,6 +112,7 @@ int main(int argc, char *argv[]) {
 #endif
 
   simulation();
+  int initTime = time(NULL);
 
   // Set the camera position
   camera.set_pos (1, 1, 1);
@@ -119,6 +124,18 @@ int main(int argc, char *argv[]) {
   while(framework.do_frame(current_thread)) {
     // Step the interval manager
     CIntervalManager::get_global_ptr()->step();
+    if(time(NULL) - initTime > 5) {
+      printf("!\n");
+      chain->mobot(0)->moveTo(DEG2RAD(0), DEG2RAD(0), DEG2RAD(90), DEG2RAD(0));
+      chain->mobot(2)->moveTo(DEG2RAD(0), DEG2RAD(90), DEG2RAD(0), DEG2RAD(0));
+    }
+    if(time(NULL) - initTime > 10) {
+      printf("!\n");
+      chain->mobot(1)->moveTo(DEG2RAD(0), DEG2RAD(45), DEG2RAD(45), DEG2RAD(0));
+      chain->mobot(0)->moveTo(DEG2RAD(0), DEG2RAD(-45), DEG2RAD(90), DEG2RAD(0));
+      chain->mobot(2)->moveTo(DEG2RAD(0), DEG2RAD(90), DEG2RAD(-45), DEG2RAD(0));
+      //chain->mobot(2)->moveTo(DEG2RAD(0), DEG2RAD(90), DEG2RAD(0), DEG2RAD(0));
+    }
   }
  
   framework.close_framework();
@@ -192,7 +209,9 @@ void simulation(){
   //mobot->build_body1(0, 0, .3, q );
   //mobot->build_center(0, 0, 4, sphere.get_quat(window->get_render()));
 #endif
-  chain = new MobotChain(window, &framework, world, space, 4);
+  chain = new MobotChain(window, &framework, world, space, 3);
+  chain->mobot(0)->moveTo(0, DEG2RAD(90), 0, 0);
+  chain->mobot(2)->moveTo(0, 0, DEG2RAD(90), 0);
 
   PT(GenericAsyncTask) simulationTaskObject =
     new GenericAsyncTask("startup task", &simulationTask, (void*) NULL);
@@ -231,6 +250,7 @@ AsyncTask::DoneStatus simulationTask (GenericAsyncTask* task, void* data) {
   const dReal *pos = mobot->get_position(0);
   double time = globalClock->get_real_time();
   double angledegrees = time * 30.0;
+  angledegrees = 120.0;
   double angleradians = angledegrees * (3.14 / 180.0);
   camera.set_pos(sin(angleradians),cos(angleradians),1);
   //camera.set_pos(LVector3f(pos[0], pos[1], pos[2]) + LVector3f(1, 1, 1));

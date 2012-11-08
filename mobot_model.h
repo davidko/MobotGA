@@ -27,6 +27,7 @@ class MobotModel
     void build_mobot_chain_tail(dReal x, dReal y, dReal z);
     void attach_mobot(MobotModel* mobot);
     const dReal* get_position(int index);
+    void moveTo(dReal a1, dReal a2, dReal a3, dReal a4);
   private:
     WindowFramework* _window;
     PandaFramework* _framework;

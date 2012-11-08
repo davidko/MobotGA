@@ -10,10 +10,16 @@ MobotModel::MobotModel(WindowFramework* window, PandaFramework* framework, dWorl
   _numBodies = 0;
   _damping = 0.00000022477;
   _maxTorque = 0.000001;
+  /*
   _desiredAngles[0] = DEG2RAD(45);
   _desiredAngles[1] = DEG2RAD(45);
   _desiredAngles[2] = DEG2RAD(45);
   _desiredAngles[3] = DEG2RAD(45);
+  */
+  _desiredAngles[0] = DEG2RAD(0);
+  _desiredAngles[1] = DEG2RAD(0);
+  _desiredAngles[2] = DEG2RAD(0);
+  _desiredAngles[3] = DEG2RAD(0);
 }
 
 MobotModel::~MobotModel()
@@ -49,17 +55,19 @@ void MobotModel::step()
   int i;
   dReal omega;
   dReal err;
-#if 0
   for(i = 0; i < 4; i++) {
+    /*
     omega = dJointGetHingeAngleRate(_joints[i]);
     printf("%lf\n", omega);
     dJointAddHingeTorque(_joints[i], -omega*_damping);
+    */
     /* PID control */
     err = _desiredAngles[i] - dJointGetHingeAngle(_joints[i]);
-    dJointSetHingeParam(_joints[i], dParamFMax, 0.01);
-    dJointSetHingeParam(_joints[i], dParamVel, err);
+    printf("%lf - %lf = %lf\n", _desiredAngles[i], dJointGetHingeAngle(_joints[i]), err);
+    dJointSetHingeParam(_joints[i], dParamFMax, .001);
+    dJointSetHingeParam(_joints[i], dParamVel, err/1.0);
   }
-#endif
+  printf("\n");
 }
 
 dBodyID MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot)
@@ -71,6 +79,7 @@ dBodyID MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot
   node.flatten_light();
   //node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
   node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
+  node.set_pos(x, y, z);
   dBodyID body = dBodyCreate(_world);
   dMass m;
   dMassSetBox(&m, FACEPLATE_M, FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
@@ -184,6 +193,7 @@ dBodyID MobotModel::build_body1(dReal x, dReal y, dReal z, LQuaternionf rot)
       (BODY_Y/2.0 - BODY_BOX1_Y), 
       0);
   node.flatten_light();
+  node.set_pos(x, y, z);
 
   dBodyID body = dBodyCreate(_world);
   dMass m;
@@ -274,6 +284,7 @@ dBodyID MobotModel::build_body2(dReal x, dReal y, dReal z, LQuaternionf rot)
       -(BODY_Y/2.0 - BODY_BOX1_Y), 
       0);
   node.flatten_light();
+  node.set_pos(x, y, z);
 
   dBodyID body = dBodyCreate(_world);
   dMass m;
@@ -359,6 +370,7 @@ dBodyID MobotModel::build_center(dReal x, dReal y, dReal z, LQuaternionf rot)
   node.set_pos(-0.5, -0.5, -0.5);
   node.flatten_light();
   node.set_scale(CENTER_X, CENTER_Y, CENTER_Z);
+  node.set_pos(x, y, z);
   dBodyID body = dBodyCreate(_world);
   dMass m;
   dMassSetBox(&m, CENTER_M, CENTER_X, CENTER_Y, CENTER_Z);
@@ -420,6 +432,7 @@ dBodyID MobotModel::build_big_faceplate(dReal x, dReal y, dReal z, LQuaternionf 
   node.flatten_light();
   //node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
   node.set_scale(FACEPLATE_X, FACEPLATE_COMPOUND_Y, FACEPLATE_Z);
+  node.set_pos(x, y, z);
   dBodyID body = dBodyCreate(_world);
   dMass m;
   dMassSetBox(&m, FACEPLATE_M*3.0, FACEPLATE_X, FACEPLATE_COMPOUND_Y, FACEPLATE_Z);
@@ -784,6 +797,15 @@ void MobotModel::attach_mobot(MobotModel* mobot)
   dJointAttach(joint, _odeBodies[3], mobot->_odeBodies[0]);
   dJointSetHingeAnchor(joint, pos[0], pos[1], pos[2]);
   dJointSetHingeAxis(joint, 0, 1, 0);
+  _joints[3] = joint;
+}
+
+void MobotModel::moveTo(dReal a1, dReal a2, dReal a3, dReal a4)
+{
+  _desiredAngles[0] = a1;
+  _desiredAngles[1] = a2;
+  _desiredAngles[2] = a3;
+  _desiredAngles[3] = a4;
 }
 
 MobotChain::MobotChain(
