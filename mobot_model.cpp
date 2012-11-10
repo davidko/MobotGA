@@ -80,6 +80,7 @@ dBodyID MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot
   //node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
   node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
   node.set_pos(x, y, z);
+  node.set_color(0.9, 0.8, 0.8, 1);
   dBodyID body = dBodyCreate(_world);
   dMass m;
   dMassSetBox(&m, FACEPLATE_M, FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
@@ -194,6 +195,7 @@ dBodyID MobotModel::build_body1(dReal x, dReal y, dReal z, LQuaternionf rot)
       0);
   node.flatten_light();
   node.set_pos(x, y, z);
+  node.set_color(0.8, 0.8, 0.9, 1);
 
   dBodyID body = dBodyCreate(_world);
   dMass m;
@@ -285,6 +287,7 @@ dBodyID MobotModel::build_body2(dReal x, dReal y, dReal z, LQuaternionf rot)
       0);
   node.flatten_light();
   node.set_pos(x, y, z);
+  node.set_color(0.9, 0.9, 0.8, 1);
 
   dBodyID body = dBodyCreate(_world);
   dMass m;
@@ -371,6 +374,7 @@ dBodyID MobotModel::build_center(dReal x, dReal y, dReal z, LQuaternionf rot)
   node.flatten_light();
   node.set_scale(CENTER_X, CENTER_Y, CENTER_Z);
   node.set_pos(x, y, z);
+  node.set_color(0.9, 0.8, 0.9, 1);
   dBodyID body = dBodyCreate(_world);
   dMass m;
   dMassSetBox(&m, CENTER_M, CENTER_X, CENTER_Y, CENTER_Z);
@@ -433,6 +437,7 @@ dBodyID MobotModel::build_big_faceplate(dReal x, dReal y, dReal z, LQuaternionf 
   //node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
   node.set_scale(FACEPLATE_X, FACEPLATE_COMPOUND_Y, FACEPLATE_Z);
   node.set_pos(x, y, z);
+  node.set_color(0.8, 0.9, 0.9, 1);
   dBodyID body = dBodyCreate(_world);
   dMass m;
   dMassSetBox(&m, FACEPLATE_M*3.0, FACEPLATE_X, FACEPLATE_COMPOUND_Y, FACEPLATE_Z);

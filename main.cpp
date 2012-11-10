@@ -5,6 +5,9 @@
 #include "pandaSystem.h"
 #include "cIntervalManager.h"
 #include "mobot_model.h"
+#include "texturePool.h"
+#include "pointLight.h"
+#include "ambientLight.h"
 using namespace std;
 
 #define MAX_CONTACTS 8          // maximum number of contact points per body
@@ -92,9 +95,22 @@ int main(int argc, char *argv[]) {
  
   // Open the window
   window = framework.open_window();
+  window->set_texture(false);
   //window->setup_trackball();
   camera = window->get_camera_group(); // Get the camera and store it
 
+  /* Set up lighting */
+  PointLight* p_light;
+  p_light = new PointLight("sun");
+  p_light->set_color(LVecBase4f(0.9, 0.9, 0.9, 1));
+  NodePath plightSun_p = window->get_render().attach_new_node(p_light);
+  plightSun_p.set_pos(10, 10, 10);
+  window->get_render().set_light(plightSun_p);
+
+  AmbientLight* alight = new AmbientLight("my alight");
+  alight->set_color(LVecBase4f(0.8, 0.8, 0.8, 1));
+  NodePath alnp = window->get_render().attach_new_node(alight);
+  window->get_render().set_light(alnp);
 
 #if 0 
   // Load the environment model
@@ -124,7 +140,7 @@ int main(int argc, char *argv[]) {
   while(framework.do_frame(current_thread)) {
     // Step the interval manager
     CIntervalManager::get_global_ptr()->step();
-    if(time(NULL) - initTime > 5) {
+    if(time(NULL) - initTime > 4) {
       printf("!\n");
       chain->mobot(0)->moveTo(DEG2RAD(0), DEG2RAD(0), DEG2RAD(90), DEG2RAD(0));
       chain->mobot(2)->moveTo(DEG2RAD(0), DEG2RAD(90), DEG2RAD(0), DEG2RAD(0));
