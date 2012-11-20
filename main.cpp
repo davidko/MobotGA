@@ -142,8 +142,9 @@ int main(int argc, char *argv[]) {
   while(framework.do_frame(current_thread)) {
     // Step the interval manager
     CIntervalManager::get_global_ptr()->step();
+#if 0
     if(time(NULL) - initTime > 2) {
-      printf("!\n");
+      //printf("!\n");
       //chain->mobot(0)->moveTo(DEG2RAD(0), DEG2RAD(0), DEG2RAD(90), DEG2RAD(0));
       //chain->mobot(2)->moveTo(DEG2RAD(0), DEG2RAD(90), DEG2RAD(0), DEG2RAD(0));
       //chain->mobot(0)->moveTo(DEG2RAD(90), DEG2RAD(0), DEG2RAD(0), DEG2RAD(0));
@@ -156,6 +157,7 @@ int main(int argc, char *argv[]) {
       chain->mobot(2)->moveTo(DEG2RAD(0), DEG2RAD(90), DEG2RAD(-45), DEG2RAD(0));
       //chain->mobot(2)->moveTo(DEG2RAD(0), DEG2RAD(90), DEG2RAD(0), DEG2RAD(0));
     }
+#endif
   }
  
   framework.close_framework();

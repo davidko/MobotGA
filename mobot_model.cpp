@@ -84,7 +84,6 @@ void MobotModel::step()
     } else {
       d = 1;
     }
-#if 0
     /* Calculate the desired angles based on fourier series */
     _desiredAngles[i] = (dReal)C2V(_a[i][0]);
     for(j = 1; j < 5; j++) {
@@ -98,7 +97,6 @@ void MobotModel::step()
     if(_desiredAngles[i] < -M_PI/2.0) {
       _desiredAngles[i] = -M_PI/2.0;
     }
-#endif
     /*
     omega = dJointGetHingeAngleRate(_joints[i]);
     printf("%lf\n", omega);
