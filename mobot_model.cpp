@@ -21,6 +21,8 @@ MobotModel::MobotModel(WindowFramework* window, PandaFramework* framework, dWorl
   _desiredAngles[2] = DEG2RAD(0);
   _desiredAngles[3] = DEG2RAD(0);
   /* Set up fourier series coefficients */
+  FILE *fp;
+  fp = fopen("/tmp/fourier_coefs.txt", "w");
   int i, j;
   for(i = 0; i < 4; i++) {
     for(j = 0; j < 5; j++) {
@@ -28,7 +30,16 @@ MobotModel::MobotModel(WindowFramework* window, PandaFramework* framework, dWorl
       _b[i][j] = rand() & 0xff;
     }
   }
-
+  for(i = 0; i < 4; i++) {
+    //printf("Joint %d\n", i+1);
+    for(j = 0; j < 5; j++) {
+      fprintf(fp, "%lf\n", C2V(_a[i][j]));
+    }
+    for(j = 0; j < 5; j++) {
+      fprintf(fp, "%lf\n", C2V(_b[i][j]));
+    }
+  }
+  fclose(fp);
 }
 
 MobotModel::~MobotModel()
@@ -57,8 +68,6 @@ void MobotModel::update()
         );
   }
 }
-
-#define C2V(x) ((((double)x - 128)/128.0)*5.0)
 
 void MobotModel::step()
 {
@@ -89,11 +98,11 @@ void MobotModel::step()
     */
     /* PID control */
     err = _desiredAngles[i] - dJointGetHingeAngle(_joints[i]);
-    printf("%lf - %lf = %lf\n", _desiredAngles[i], dJointGetHingeAngle(_joints[i]), err);
+    //printf("%lf - %lf = %lf\n", _desiredAngles[i], dJointGetHingeAngle(_joints[i]), err);
     dJointSetHingeParam(_joints[i], dParamFMax, .001);
     dJointSetHingeParam(_joints[i], dParamVel, err/1.0);
   }
-  printf("\n");
+  //printf("\n");
 }
 
 dBodyID MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot)

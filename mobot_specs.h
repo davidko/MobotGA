@@ -1,6 +1,11 @@
 #ifndef _MOBOT_SPECS_H_
 #define _MOBOT_SPECS_H_
 
+/* Notes */
+/* 
+ * Motor 2 angle should be negated 
+ * */
+
 #define FACEPLATE_Y .00845 
 #define FACEPLATE_Z .0763
 #define FACEPLATE_X FACEPLATE_Z
