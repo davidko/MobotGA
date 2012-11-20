@@ -75,9 +75,16 @@ void MobotModel::step()
   int i,j;
   dReal omega;
   dReal err;
+  double d;
   double t = globalClock->get_real_time();
 
   for(i = 0; i < 4; i++) {
+    if(i == 0 || i == 2) {
+      d = -1;
+    } else {
+      d = 1;
+    }
+#if 0
     /* Calculate the desired angles based on fourier series */
     _desiredAngles[i] = (dReal)C2V(_a[i][0]);
     for(j = 1; j < 5; j++) {
@@ -91,16 +98,17 @@ void MobotModel::step()
     if(_desiredAngles[i] < -M_PI/2.0) {
       _desiredAngles[i] = -M_PI/2.0;
     }
+#endif
     /*
     omega = dJointGetHingeAngleRate(_joints[i]);
     printf("%lf\n", omega);
     dJointAddHingeTorque(_joints[i], -omega*_damping);
     */
     /* PID control */
-    err = _desiredAngles[i] - dJointGetHingeAngle(_joints[i]);
+    err = _desiredAngles[i] - d*dJointGetHingeAngle(_joints[i]);
     //printf("%lf - %lf = %lf\n", _desiredAngles[i], dJointGetHingeAngle(_joints[i]), err);
     dJointSetHingeParam(_joints[i], dParamFMax, .001);
-    dJointSetHingeParam(_joints[i], dParamVel, err/1.0);
+    dJointSetHingeParam(_joints[i], dParamVel, d*err/1.0);
   }
   //printf("\n");
 }

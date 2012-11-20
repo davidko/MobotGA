@@ -3,7 +3,8 @@
 
 /* Notes */
 /* 
- * Motor 2 angle should be negated 
+ * Motor 1 angle should be negated 
+ * Motor 3 angle should be negated 
  * */
 
 #define FACEPLATE_Y .00845 

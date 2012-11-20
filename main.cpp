@@ -142,11 +142,12 @@ int main(int argc, char *argv[]) {
   while(framework.do_frame(current_thread)) {
     // Step the interval manager
     CIntervalManager::get_global_ptr()->step();
-#if 0
-    if(time(NULL) - initTime > 4) {
+    if(time(NULL) - initTime > 2) {
       printf("!\n");
-      chain->mobot(0)->moveTo(DEG2RAD(0), DEG2RAD(0), DEG2RAD(90), DEG2RAD(0));
-      chain->mobot(2)->moveTo(DEG2RAD(0), DEG2RAD(90), DEG2RAD(0), DEG2RAD(0));
+      //chain->mobot(0)->moveTo(DEG2RAD(0), DEG2RAD(0), DEG2RAD(90), DEG2RAD(0));
+      //chain->mobot(2)->moveTo(DEG2RAD(0), DEG2RAD(90), DEG2RAD(0), DEG2RAD(0));
+      //chain->mobot(0)->moveTo(DEG2RAD(90), DEG2RAD(0), DEG2RAD(0), DEG2RAD(0));
+      //chain->mobot(2)->moveTo(DEG2RAD(90), DEG2RAD(0), DEG2RAD(0), DEG2RAD(0));
     }
     if(time(NULL) - initTime > 10) {
       printf("!\n");
@@ -155,7 +156,6 @@ int main(int argc, char *argv[]) {
       chain->mobot(2)->moveTo(DEG2RAD(0), DEG2RAD(90), DEG2RAD(-45), DEG2RAD(0));
       //chain->mobot(2)->moveTo(DEG2RAD(0), DEG2RAD(90), DEG2RAD(0), DEG2RAD(0));
     }
-#endif
   }
  
   framework.close_framework();
@@ -231,8 +231,8 @@ void simulation(){
   //mobot->build_center(0, 0, 4, sphere.get_quat(window->get_render()));
 #endif
   chain = new MobotChain(window, &framework, world, space, 3);
-  chain->mobot(0)->moveTo(0, DEG2RAD(90), 0, 0);
-  chain->mobot(2)->moveTo(0, 0, DEG2RAD(90), 0);
+  //chain->mobot(0)->moveTo(0, DEG2RAD(90), 0, 0);
+  //chain->mobot(2)->moveTo(0, 0, DEG2RAD(90), 0);
 
   PT(GenericAsyncTask) simulationTaskObject =
     new GenericAsyncTask("startup task", &simulationTask, (void*) NULL);
@@ -273,7 +273,7 @@ AsyncTask::DoneStatus simulationTask (GenericAsyncTask* task, void* data) {
   double angledegrees = time * 30.0;
   angledegrees = 120.0;
   double angleradians = angledegrees * (3.14 / 180.0);
-  camera.set_pos(sin(angleradians),cos(angleradians),1);
+  camera.set_pos(-sin(angleradians),-cos(angleradians),1);
   //camera.set_pos(LVector3f(pos[0], pos[1], pos[2]) + LVector3f(1, 1, 1));
   camera.look_at(LVector3f(pos[0], pos[1], pos[2]));
 
