@@ -9,6 +9,8 @@
 #define RAD2DEG(x) ((x)*180.0/M_PI)
 #define DEG2RAD(x) ((x)*M_PI/180.0)
 
+extern PT(ClockObject) globalClock;
+
 class MobotModel
 {
   public:
@@ -40,6 +42,8 @@ class MobotModel
     dReal _maxTorque;
     int _numBodies;
     dReal _desiredAngles[4];
+    uint8_t _a[4][5];
+    uint8_t _b[4][5];
 };
 
 class MobotChain

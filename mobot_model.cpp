@@ -20,6 +20,15 @@ MobotModel::MobotModel(WindowFramework* window, PandaFramework* framework, dWorl
   _desiredAngles[1] = DEG2RAD(0);
   _desiredAngles[2] = DEG2RAD(0);
   _desiredAngles[3] = DEG2RAD(0);
+  /* Set up fourier series coefficients */
+  int i, j;
+  for(i = 0; i < 4; i++) {
+    for(j = 0; j < 5; j++) {
+      _a[i][j] = rand() & 0xff;
+      _b[i][j] = rand() & 0xff;
+    }
+  }
+
 }
 
 MobotModel::~MobotModel()
@@ -49,13 +58,30 @@ void MobotModel::update()
   }
 }
 
+#define C2V(x) ((((double)x - 128)/128.0)*5.0)
+
 void MobotModel::step()
 {
   /* Add damping forces */
-  int i;
+  int i,j;
   dReal omega;
   dReal err;
+  double t = globalClock->get_real_time();
+
   for(i = 0; i < 4; i++) {
+    /* Calculate the desired angles based on fourier series */
+    _desiredAngles[i] = (dReal)C2V(_a[i][0]);
+    for(j = 1; j < 5; j++) {
+      _desiredAngles[i] += (dReal)C2V(_a[i][j]) * (dReal)sin(2*M_PI*t*j/10.0);
+      _desiredAngles[i] += (dReal)C2V(_b[i][j]) * (dReal)cos(2*M_PI*t*j/10.0);
+      //printf("%lf\n", C2V(a[i][j]));
+    }
+    if(_desiredAngles[i] > M_PI/2.0) {
+      _desiredAngles[i] = M_PI/2.0;
+    }
+    if(_desiredAngles[i] < -M_PI/2.0) {
+      _desiredAngles[i] = -M_PI/2.0;
+    }
     /*
     omega = dJointGetHingeAngleRate(_joints[i]);
     printf("%lf\n", omega);

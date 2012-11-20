@@ -24,6 +24,8 @@ MobotModel* mobot, *mobot2;
 MobotChain* chain;
 PT(ClockObject) globalClock = ClockObject::get_global_clock();
 int init = 1;
+uint8_t a[4][5];
+uint8_t b[4][5];
  
 // Create an accumulator to track the time since the sim
 // has been running
@@ -104,11 +106,11 @@ int main(int argc, char *argv[]) {
   p_light = new PointLight("sun");
   p_light->set_color(LVecBase4f(0.9, 0.9, 0.9, 1));
   NodePath plightSun_p = window->get_render().attach_new_node(p_light);
-  plightSun_p.set_pos(10, 10, 10);
+  plightSun_p.set_pos(15, 15, 5);
   window->get_render().set_light(plightSun_p);
 
   AmbientLight* alight = new AmbientLight("my alight");
-  alight->set_color(LVecBase4f(0.8, 0.8, 0.8, 1));
+  alight->set_color(LVecBase4f(0.8, 0.8, 0.8, 0.5));
   NodePath alnp = window->get_render().attach_new_node(alight);
   window->get_render().set_light(alnp);
 
@@ -159,6 +161,7 @@ int main(int argc, char *argv[]) {
 }
 
 void simulation(){
+  srand(time(NULL));
   // Load the cube where the ball will fall from
 #if 0
   NodePath cube = window->load_model(framework.get_models(), "models/box");
