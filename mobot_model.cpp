@@ -22,7 +22,7 @@ MobotModel::MobotModel(WindowFramework* window, PandaFramework* framework, dWorl
   _desiredAngles[3] = DEG2RAD(0);
   /* Set up fourier series coefficients */
   FILE *fp;
-  fp = fopen("/tmp/fourier_coefs.txt", "w");
+  fp = fopen("/tmp/fourier_coefs.txt", "a");
   int i, j;
   for(i = 0; i < 4; i++) {
     for(j = 0; j < 5; j++) {
