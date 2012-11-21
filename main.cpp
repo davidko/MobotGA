@@ -59,7 +59,7 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
     //contact[i].surface.mode = dContactBounce | dContactSoftCFM | dContactSlip1 | dContactSlip2;
     contact[i].surface.mode = dContactBounce | dContactSoftCFM ;
     //contact[i].surface.mu = dInfinity;
-    contact[i].surface.mu = 0;
+    contact[i].surface.mu = 0.01;
     contact[i].surface.mu2 = 0;
     contact[i].surface.bounce = 0.1;
     contact[i].surface.bounce_vel = 0.1;
@@ -275,7 +275,7 @@ AsyncTask::DoneStatus simulationTask (GenericAsyncTask* task, void* data) {
   double angledegrees = time * 30.0;
   angledegrees = 120.0;
   double angleradians = angledegrees * (3.14 / 180.0);
-  camera.set_pos(-sin(angleradians),-cos(angleradians),1);
+  camera.set_pos(-2*sin(angleradians),-2*cos(angleradians),1);
   //camera.set_pos(LVector3f(pos[0], pos[1], pos[2]) + LVector3f(1, 1, 1));
   camera.look_at(LVector3f(pos[0], pos[1], pos[2]));
 
