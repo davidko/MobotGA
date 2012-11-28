@@ -26,8 +26,8 @@ MobotModel::MobotModel(WindowFramework* window, PandaFramework* framework, dWorl
   int i, j;
   for(i = 0; i < 4; i++) {
     for(j = 0; j < 5; j++) {
-      _a[i][j] = rand() & 0xff;
-      _b[i][j] = rand() & 0xff;
+      _a[i][j] = rand() % 64 + 128 - 32;
+      _b[i][j] = rand() % 64 + 128 - 32;
     }
   }
   for(i = 0; i < 4; i++) {
@@ -85,17 +85,19 @@ void MobotModel::step()
       d = 1;
     }
     /* Calculate the desired angles based on fourier series */
-    _desiredAngles[i] = (dReal)C2V(_a[i][0]);
+    _desiredAngles[i] = (dReal)0.5*C2V(_a[i][0]);
     for(j = 1; j < 5; j++) {
       _desiredAngles[i] += (dReal)C2V(_a[i][j]) * (dReal)sin(2*M_PI*t*j/10.0);
       _desiredAngles[i] += (dReal)C2V(_b[i][j]) * (dReal)cos(2*M_PI*t*j/10.0);
       //printf("%lf\n", C2V(a[i][j]));
     }
-    if(_desiredAngles[i] > M_PI/2.0) {
-      _desiredAngles[i] = M_PI/2.0;
-    }
-    if(_desiredAngles[i] < -M_PI/2.0) {
-      _desiredAngles[i] = -M_PI/2.0;
+    if(i == 1 || i == 2) {
+      if(_desiredAngles[i] > M_PI/2.0) {
+        _desiredAngles[i] = M_PI/2.0;
+      }
+      if(_desiredAngles[i] < -M_PI/2.0) {
+        _desiredAngles[i] = -M_PI/2.0;
+      }
     }
     /*
     omega = dJointGetHingeAngleRate(_joints[i]);

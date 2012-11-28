@@ -91,6 +91,9 @@ AsyncTask::DoneStatus SpinCameraTask(GenericAsyncTask* task, void* data) {
 }
  
 int main(int argc, char *argv[]) {
+  /* Delete old fourier coefficients file */
+  unlink("/tmp/fourier_coefs.txt");
+
   // Open a new window framework and set the title
   framework.open_framework(argc, argv);
   framework.set_window_title("My Panda3D Window");
