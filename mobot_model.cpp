@@ -856,6 +856,20 @@ void MobotModel::moveTo(dReal a1, dReal a2, dReal a3, dReal a4)
   _desiredAngles[3] = a4;
 }
 
+void MobotModel::getJointAngles(dReal *angles)
+{
+  double d;
+  int i;
+  for(i = 0; i < 4; i++) {
+    if(i == 0 || i == 2) {
+      d = -1;
+    } else {
+      d = 1;
+    }
+    angles[i] = d*dJointGetHingeAngle(_joints[i]);
+  }
+}
+
 MobotChain::MobotChain(
     WindowFramework* window,
     PandaFramework* framework,
@@ -909,9 +923,18 @@ MobotModel* MobotChain::mobot(int index)
 void MobotChain::step()
 {
   int i;
+  dReal angles[4];
   for(i = 0; i < _numMobots; i++) {
     _mobots[i]->step();
   }
+
+  // print angle data for first mobot
+  printf("%lf ", globalClock->get_real_time());
+  _mobots[0]->getJointAngles(angles);
+  for(i = 0; i < 4; i++) {
+    printf("%lf ", angles[i]);
+  }
+  printf("\n");
 }
 
 void MobotChain::update()

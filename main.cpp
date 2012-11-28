@@ -202,7 +202,7 @@ void simulation(){
 
   dWorldSetContactMaxCorrectingVel (world,0.1);
   dWorldSetContactSurfaceLayer (world,0.001);
-  dCreatePlane (space,0,0,1,0);
+  dCreatePlane (space,0,0,1,-0.5);
   dSpaceCollide (space,0,&nearCallback);
 
   //mobot = new MobotModel(window, &framework, world, space);
@@ -241,7 +241,7 @@ void simulation(){
 
   PT(GenericAsyncTask) simulationTaskObject =
     new GenericAsyncTask("startup task", &simulationTask, (void*) NULL);
-  simulationTaskObject->set_delay(2);
+  //simulationTaskObject->set_delay(4);
   taskMgr->add(simulationTaskObject);
 }
  
@@ -262,7 +262,9 @@ AsyncTask::DoneStatus simulationTask (GenericAsyncTask* task, void* data) {
     // Step the simulation
     dSpaceCollide (space,0,&nearCallback);
     dWorldStep(world, stepSize);
-    chain->step();
+    if(globalClock->get_real_time() > 10) {
+      chain->step();
+    }
     //mobot->step();
     //mobot2->step();
     //world.step(stepSize);

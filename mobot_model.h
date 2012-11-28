@@ -31,6 +31,7 @@ class MobotModel
     void attach_mobot(MobotModel* mobot);
     const dReal* get_position(int index);
     void moveTo(dReal a1, dReal a2, dReal a3, dReal a4);
+    void getJointAngles(dReal *angles); // must contain space to store 4 dReals
   private:
     WindowFramework* _window;
     PandaFramework* _framework;

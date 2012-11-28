@@ -4,7 +4,11 @@
 plot "data.txt" using 1:2 with lines , \
 "data.txt" using 1:3 with lines , \
 "data.txt" using 1:4 with lines , \
-"data.txt" using 1:5 with lines 
+"data.txt" using 1:5 with lines , \
+"../jointdata.txt" using 1:2 with lines , \
+"../jointdata.txt" using 1:3 with lines , \
+"../jointdata.txt" using 1:4 with lines , \
+"../jointdata.txt" using 1:5 with lines 
 #"data.txt" using 1:6 with lines , \
 #"data.txt" using 1:7 with lines , \
 #"data.txt" using 1:8 with lines , \
@@ -13,3 +17,4 @@ plot "data.txt" using 1:2 with lines , \
 #"data.txt" using 1:11 with lines , \
 #"data.txt" using 1:12 with lines , \
 #"data.txt" using 1:13 with lines 
+

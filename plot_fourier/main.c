@@ -8,8 +8,8 @@ int main()
   double b[12][5];
   int i, j, k;
   double t_0 = 0;
-  double t_f = 10.0;
-  double Nsteps = 200;
+  double t_f = 40.0;
+  double Nsteps = 800;
   double T = 10.0;
   double t;
   double f;
