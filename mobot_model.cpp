@@ -107,7 +107,10 @@ void MobotModel::step()
     /* PID control */
     err = _desiredAngles[i] - d*dJointGetHingeAngle(_joints[i]);
     //printf("%lf - %lf = %lf\n", _desiredAngles[i], dJointGetHingeAngle(_joints[i]), err);
-    dJointSetHingeParam(_joints[i], dParamFMax, .001);
+    err *= 5;
+    if(err > M_PI) err = M_PI;
+    if(err < -M_PI) err = -M_PI;
+    dJointSetHingeParam(_joints[i], dParamFMax, .01);
     dJointSetHingeParam(_joints[i], dParamVel, d*err/1.0);
   }
   //printf("\n");
@@ -928,11 +931,19 @@ void MobotChain::step()
     _mobots[i]->step();
   }
 
+#if 0
   // print angle data for first mobot
-  printf("%lf ", globalClock->get_real_time());
+  printf("%lf ", globalClock->get_real_time() );
   _mobots[0]->getJointAngles(angles);
   for(i = 0; i < 4; i++) {
     printf("%lf ", angles[i]);
+  }
+  printf("\n");
+#endif
+  // Print position data of center mobot
+  const dReal* pos = _mobots[_numMobots/2]->get_position(3);
+  for(i = 0; i < 3; i++) {
+    printf("%lf ", pos[i]);
   }
   printf("\n");
 }

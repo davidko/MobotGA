@@ -8,10 +8,12 @@
 #include "texturePool.h"
 #include "pointLight.h"
 #include "ambientLight.h"
+#include "main.h"
 using namespace std;
 
 #define MAX_CONTACTS 8          // maximum number of contact points per body
 // Global stuff
+
  
 dWorldID world;
 dSpaceID space;
@@ -32,13 +34,10 @@ uint8_t b[4][5];
 float deltaTimeAccumulator = 0.0f;
  
 // This stepSize makes the simulation run at 90 frames per second
-float stepSize = 1.0f / 90.0f;
+float stepSize = 1.0f / 30.0f;
 //float stepSize = 0.05;
 WindowFramework *window;
 PandaFramework framework;
- 
-AsyncTask::DoneStatus simulationTask (GenericAsyncTask* task, void* data);
-void simulation();
  
  
 PT(AsyncTaskManager) taskMgr = AsyncTaskManager::get_global_ptr(); 
@@ -94,6 +93,35 @@ int main(int argc, char *argv[]) {
   /* Delete old fourier coefficients file */
   unlink("/tmp/fourier_coefs.txt");
 
+  initGraphics(argc, argv);
+
+#if 0
+  // Add our task.
+  taskMgr->add(new GenericAsyncTask("Spins the camera",
+    &SpinCameraTask, (void*) NULL));
+#endif
+
+  simulation();
+  int initTime = time(NULL);
+
+  // Set the camera position
+  camera.set_pos (1, 1, 1);
+  camera.look_at (0, 0, 0);
+ 
+  // This is a simpler way to do stuff every frame,
+  // if you're too lazy to create a task.
+  Thread *current_thread = Thread::get_current_thread();
+  while(framework.do_frame(current_thread)) {
+    // Step the interval manager
+    CIntervalManager::get_global_ptr()->step();
+  }
+
+  closeGraphics(); 
+  return (0);
+}
+
+void initGraphics(int argc, char *argv[])
+{
   // Open a new window framework and set the title
   framework.open_framework(argc, argv);
   framework.set_window_title("My Panda3D Window");
@@ -116,67 +144,15 @@ int main(int argc, char *argv[]) {
   alight->set_color(LVecBase4f(0.8, 0.8, 0.8, 0.5));
   NodePath alnp = window->get_render().attach_new_node(alight);
   window->get_render().set_light(alnp);
+}
 
-#if 0 
-  // Load the environment model
-  NodePath environ = window->load_model(framework.get_models(),
-    "models/environment");
-  environ.reparent_to(window->get_render());
-  environ.set_scale(0.25 , 0.25, 0.25);
-  environ.set_pos(-8, 42, 0);
-#endif
-
-#if 0
-  // Add our task.
-  taskMgr->add(new GenericAsyncTask("Spins the camera",
-    &SpinCameraTask, (void*) NULL));
-#endif
-
-  simulation();
-  int initTime = time(NULL);
-
-  // Set the camera position
-  camera.set_pos (1, 1, 1);
-  camera.look_at (0, 0, 0);
- 
-  // This is a simpler way to do stuff every frame,
-  // if you're too lazy to create a task.
-  Thread *current_thread = Thread::get_current_thread();
-  while(framework.do_frame(current_thread)) {
-    // Step the interval manager
-    CIntervalManager::get_global_ptr()->step();
-#if 0
-    if(time(NULL) - initTime > 2) {
-      //printf("!\n");
-      //chain->mobot(0)->moveTo(DEG2RAD(0), DEG2RAD(0), DEG2RAD(90), DEG2RAD(0));
-      //chain->mobot(2)->moveTo(DEG2RAD(0), DEG2RAD(90), DEG2RAD(0), DEG2RAD(0));
-      //chain->mobot(0)->moveTo(DEG2RAD(90), DEG2RAD(0), DEG2RAD(0), DEG2RAD(0));
-      //chain->mobot(2)->moveTo(DEG2RAD(90), DEG2RAD(0), DEG2RAD(0), DEG2RAD(0));
-    }
-    if(time(NULL) - initTime > 10) {
-      printf("!\n");
-      chain->mobot(1)->moveTo(DEG2RAD(0), DEG2RAD(45), DEG2RAD(45), DEG2RAD(0));
-      chain->mobot(0)->moveTo(DEG2RAD(0), DEG2RAD(-45), DEG2RAD(90), DEG2RAD(0));
-      chain->mobot(2)->moveTo(DEG2RAD(0), DEG2RAD(90), DEG2RAD(-45), DEG2RAD(0));
-      //chain->mobot(2)->moveTo(DEG2RAD(0), DEG2RAD(90), DEG2RAD(0), DEG2RAD(0));
-    }
-#endif
-  }
- 
+void closeGraphics(void)
+{
   framework.close_framework();
-  return (0);
 }
 
 void simulation(){
   srand(time(NULL));
-  // Load the cube where the ball will fall from
-#if 0
-  NodePath cube = window->load_model(framework.get_models(), "models/box");
-  cube.reparent_to(window->get_render());
-  cube.set_scale(0.25, 0.25, 0.25);
-  cube.set_pos(0, 0, 0);
-#endif
-
   // create world
   dInitODE();
   dAllocateODEDataForThread(dAllocateMaskAll);
@@ -205,36 +181,6 @@ void simulation(){
   dCreatePlane (space,0,0,1,-0.5);
   dSpaceCollide (space,0,&nearCallback);
 
-  //mobot = new MobotModel(window, &framework, world, space);
-  //mobot2 = new MobotModel(window, &framework, world, space);
-  /* Create the body */
-#if 0
-  body = new OdeBody(world);
-  OdeMass M = OdeMass();
-  M.set_box(50, 1.0, 1.0, 1.0);
-  body->set_mass(M);
-  body->set_position(sphere.get_pos(window->get_render()));
-  body->set_quaternion(sphere.get_quat(window->get_render()));
-  OdeBoxGeom* boxGeom = new OdeBoxGeom(*space, (dReal)1.0, (dReal)1.0, (dReal)1.0);
-  boxGeom->set_collide_bits(0x02);
-  boxGeom->set_category_bits(0x01);
-  boxGeom->set_body(*body);
-#endif
-#if 0
-  LQuaternionf q;
-  q.set_from_axis_angle(9, LVector3f(1, 0, 0));
-  //mobot->build_mobot(0, 0, 0.3, q);
-  //mobot2->build_mobot(0.3, 0, 0.3, q);
-  //mobot->build_mobot_chain_head(0, 0, 0.3);
-  mobot2->build_mobot_chain_tail(
-      0.0, 
-      FACEPLATE_Y/2.0 + BODY_Y*2.0 + FACEPLATE_COMPOUND_Y/2.0, 
-      0.3);
-  mobot->attach_mobot(mobot2);
-  //mobot->build_faceplate1(0, 0, 0.3, q);
-  //mobot->build_body1(0, 0, .3, q );
-  //mobot->build_center(0, 0, 4, sphere.get_quat(window->get_render()));
-#endif
   chain = new MobotChain(window, &framework, world, space, 3);
   //chain->mobot(0)->moveTo(0, DEG2RAD(90), 0, 0);
   //chain->mobot(2)->moveTo(0, 0, DEG2RAD(90), 0);
@@ -262,7 +208,7 @@ AsyncTask::DoneStatus simulationTask (GenericAsyncTask* task, void* data) {
     // Step the simulation
     dSpaceCollide (space,0,&nearCallback);
     dWorldStep(world, stepSize);
-    if(globalClock->get_real_time() > 10) {
+    if(globalClock->get_real_time() > WAIT_TIME) {
       chain->step();
     }
     //mobot->step();
