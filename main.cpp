@@ -96,9 +96,31 @@ int main(int argc, char *argv[]) {
 
   /* Process command line arguments */
   int i;
+  FILE *coefs = NULL;
   for(i = 1; i < argc; i++) {
+    if(
+        !strcmp(argv[i], "--help") ||
+        !strcmp(argv[i], "-h")
+        ) {
+      printf("Available options:\n"
+             "  --disable-graphics: Run w/out opening visualization window\n"
+             "  --load-coefs <filename> : Load coefficients file\n");
+      exit(0);
+    }
     if(!strcmp(argv[i], "--disable-graphics")) {
       gEnableGraphics=false;
+    }
+    if(!strcmp(argv[i], "--load-coefs")) {
+      i++;
+      if(i >= argc) {
+        fprintf(stderr, "Error: --load-coefs expects a filename\n");
+        return 0;
+      }
+      coefs = fopen(argv[i], "r");
+      if(coefs == NULL) {
+        fprintf(stderr, "Error opening file: %s\n", argv[i]);
+        return 0;
+      }
     }
   }
 
@@ -115,7 +137,7 @@ int main(int argc, char *argv[]) {
     &SpinCameraTask, (void*) NULL));
 #endif
 
-  simulation();
+  simulation(coefs);
   int initTime = time(NULL);
 
   if(gEnableGraphics) {
@@ -178,7 +200,7 @@ void closeGraphics(void)
   framework.close_framework();
 }
 
-void simulation(){
+void simulation(FILE* coefs){
   srand(time(NULL));
   // create world
   dInitODE();
@@ -209,9 +231,9 @@ void simulation(){
   dSpaceCollide (space,0,&nearCallback);
 
   if(gEnableGraphics) {
-    chain = new MobotChain(window, &framework, world, space, 3);
+    chain = new MobotChain(window, &framework, world, space, 3, coefs);
   } else {
-    chain = new MobotChain(NULL, NULL, world, space, 3);
+    chain = new MobotChain(NULL, NULL, world, space, 3, coefs);
   }
   //chain->mobot(0)->moveTo(0, DEG2RAD(90), 0, 0);
   //chain->mobot(2)->moveTo(0, 0, DEG2RAD(90), 0);

@@ -16,7 +16,7 @@ extern PT(ClockObject) globalClock;
 class MobotModel
 {
   public:
-    MobotModel(WindowFramework* window, PandaFramework* framework, dWorldID world, dSpaceID space);
+    MobotModel(WindowFramework* window, PandaFramework* framework, dWorldID world, dSpaceID space, FILE* coefs);
     ~MobotModel();
     void update();
     void step(double time = -1);
@@ -56,7 +56,8 @@ class MobotChain
         PandaFramework* framework, 
         dWorldID world, 
         dSpaceID space, 
-        int num_modules);
+        int num_modules,
+        FILE* coefs = NULL);
     MobotModel* mobot(int index);
     void step(double time = -1);
     void update();

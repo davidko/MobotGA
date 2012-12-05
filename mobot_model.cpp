@@ -1,7 +1,7 @@
 #include "mobot_model.h"
 #include "main.h"
 
-MobotModel::MobotModel(WindowFramework* window, PandaFramework* framework, dWorldID world, dSpaceID space)
+MobotModel::MobotModel(WindowFramework* window, PandaFramework* framework, dWorldID world, dSpaceID space, FILE* coefs)
 {
   _window = window;
   _framework = framework;
@@ -21,26 +21,42 @@ MobotModel::MobotModel(WindowFramework* window, PandaFramework* framework, dWorl
   _desiredAngles[1] = DEG2RAD(0);
   _desiredAngles[2] = DEG2RAD(0);
   _desiredAngles[3] = DEG2RAD(0);
-  /* Set up fourier series coefficients */
-  FILE *fp;
-  fp = fopen("/tmp/fourier_coefs.txt", "a");
+  /* If there are no pre-supplied coefficients for the fourier series */
   int i, j;
-  for(i = 0; i < 4; i++) {
-    for(j = 0; j < 5; j++) {
-      _a[i][j] = rand() % 64 + 128 - 32;
-      _b[i][j] = rand() % 64 + 128 - 32;
+  if(coefs == NULL) {
+    /* Set up fourier series coefficients */
+    FILE *fp;
+    fp = fopen("/tmp/fourier_coefs.txt", "a");
+    for(i = 0; i < 4; i++) {
+      for(j = 0; j < 5; j++) {
+        _a[i][j] = rand() % 64 + 128 - 32;
+        _b[i][j] = rand() % 64 + 128 - 32;
+      }
+    }
+    for(i = 0; i < 4; i++) {
+      //printf("Joint %d\n", i+1);
+      for(j = 0; j < 5; j++) {
+        fprintf(fp, "%lf\n", C2V(_a[i][j]));
+      }
+      for(j = 0; j < 5; j++) {
+        fprintf(fp, "%lf\n", C2V(_b[i][j]));
+      }
+    }
+    fclose(fp);
+  } else {
+    int d;
+    /* If there is a coefficients file, use that */
+    for(i = 0; i < 4; i++) {
+      for(j = 0; j < 5; j++) {
+        fscanf(coefs, "%d", &d);
+        _a[i][j] = d;
+      }
+      for(j = 0; j < 5; j++) {
+        fscanf(coefs, "%d", &d);
+        _b[i][j] = d;
+      }
     }
   }
-  for(i = 0; i < 4; i++) {
-    //printf("Joint %d\n", i+1);
-    for(j = 0; j < 5; j++) {
-      fprintf(fp, "%lf\n", C2V(_a[i][j]));
-    }
-    for(j = 0; j < 5; j++) {
-      fprintf(fp, "%lf\n", C2V(_b[i][j]));
-    }
-  }
-  fclose(fp);
 }
 
 MobotModel::~MobotModel()
@@ -896,7 +912,8 @@ MobotChain::MobotChain(
     PandaFramework* framework,
     dWorldID world,
     dSpaceID space,
-    int num_modules)
+    int num_modules, 
+    FILE *coefs)
 {
   if(num_modules < 1) {
     return;
@@ -908,17 +925,17 @@ MobotChain::MobotChain(
   _numMobots = num_modules;
   if(num_modules == 1) {
     /* Just create one mobot */
-    _mobots[0] = new MobotModel(_window, _framework, _world, _space);
+    _mobots[0] = new MobotModel(_window, _framework, _world, _space, coefs);
     _mobots[0]->build_mobot(0, 0, 0, LQuaternionf(1, 0, 0, 0));
     return;
   }
   /* If more than one, build a head module first */
-  _mobots[0] = new MobotModel(_window, _framework, _world, _space);
+  _mobots[0] = new MobotModel(_window, _framework, _world, _space, coefs);
   _mobots[0]->build_mobot_chain_head(0, 0, 0);
   /* For each of the intermediate ones, build a body */
   int i;
   for(i = 1; i < _numMobots-1; i++) {
-    _mobots[i] = new MobotModel(_window, _framework, _world, _space);
+    _mobots[i] = new MobotModel(_window, _framework, _world, _space, coefs);
     _mobots[i]->build_mobot_chain_body(
         0,
         FACEPLATE_Y/2.0 + BODY_Y*2.0 + FACEPLATE_COMPOUND_Y/2.0 + 
@@ -927,7 +944,7 @@ MobotChain::MobotChain(
     _mobots[i-1]->attach_mobot(_mobots[i]);
   }
   /* Build last tail mobot */
-  _mobots[i] = new MobotModel(_window, _framework, _world, _space);
+  _mobots[i] = new MobotModel(_window, _framework, _world, _space, coefs);
   _mobots[i]->build_mobot_chain_tail(
       0,
       FACEPLATE_Y/2.0 + BODY_Y*2.0 + FACEPLATE_COMPOUND_Y/2.0 + 
