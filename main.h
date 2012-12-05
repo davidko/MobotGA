@@ -6,5 +6,6 @@ void initGraphics(int argc, char *argv[]);
 void closeGraphics(void);
 void simulation();
 AsyncTask::DoneStatus simulationTask (GenericAsyncTask* task, void* data);
+extern bool gEnableGraphics;
 
 #endif

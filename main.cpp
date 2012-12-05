@@ -28,13 +28,14 @@ PT(ClockObject) globalClock = ClockObject::get_global_clock();
 int init = 1;
 uint8_t a[4][5];
 uint8_t b[4][5];
+bool gEnableGraphics = true;
  
 // Create an accumulator to track the time since the sim
 // has been running
 float deltaTimeAccumulator = 0.0f;
  
 // This stepSize makes the simulation run at 90 frames per second
-float stepSize = 1.0f / 30.0f;
+double stepSize = 1.0 / 90.0;
 //float stepSize = 0.05;
 WindowFramework *window;
 PandaFramework framework;
@@ -93,7 +94,20 @@ int main(int argc, char *argv[]) {
   /* Delete old fourier coefficients file */
   unlink("/tmp/fourier_coefs.txt");
 
-  initGraphics(argc, argv);
+  /* Process command line arguments */
+  int i;
+  for(i = 1; i < argc; i++) {
+    if(!strcmp(argv[i], "--disable-graphics")) {
+      gEnableGraphics=false;
+    }
+  }
+
+  if(gEnableGraphics) {
+    stepSize = 1.0f / 30.0;
+    initGraphics(argc, argv);
+  } else {
+    stepSize = 1.0f / 30.0;
+  }
 
 #if 0
   // Add our task.
@@ -104,19 +118,32 @@ int main(int argc, char *argv[]) {
   simulation();
   int initTime = time(NULL);
 
-  // Set the camera position
-  camera.set_pos (1, 1, 1);
-  camera.look_at (0, 0, 0);
- 
-  // This is a simpler way to do stuff every frame,
-  // if you're too lazy to create a task.
-  Thread *current_thread = Thread::get_current_thread();
-  while(framework.do_frame(current_thread)) {
-    // Step the interval manager
-    CIntervalManager::get_global_ptr()->step();
-  }
+  if(gEnableGraphics) {
+    // Set the camera position
+    camera.set_pos (1, 1, 1);
+    camera.look_at (0, 0, 0);
 
-  closeGraphics(); 
+    // This is a simpler way to do stuff every frame,
+    // if you're too lazy to create a task.
+    Thread *current_thread = Thread::get_current_thread();
+    while(framework.do_frame(current_thread)) {
+      // Step the interval manager
+      CIntervalManager::get_global_ptr()->step();
+    }
+
+    closeGraphics(); 
+  } else {
+    double time = 0;
+    while(1) {
+      printf("%lf ", time);
+      dSpaceCollide (space,0,&nearCallback);
+      dWorldStep(world, stepSize);
+      chain->step(time);
+      dJointGroupEmpty(contactgroup);
+      time += stepSize;
+      if(time > 30) {break;}
+    }
+  }
   return (0);
 }
 
@@ -181,7 +208,11 @@ void simulation(){
   dCreatePlane (space,0,0,1,-0.5);
   dSpaceCollide (space,0,&nearCallback);
 
-  chain = new MobotChain(window, &framework, world, space, 3);
+  if(gEnableGraphics) {
+    chain = new MobotChain(window, &framework, world, space, 3);
+  } else {
+    chain = new MobotChain(NULL, NULL, world, space, 3);
+  }
   //chain->mobot(0)->moveTo(0, DEG2RAD(90), 0, 0);
   //chain->mobot(2)->moveTo(0, 0, DEG2RAD(90), 0);
 

@@ -19,7 +19,7 @@ class MobotModel
     MobotModel(WindowFramework* window, PandaFramework* framework, dWorldID world, dSpaceID space);
     ~MobotModel();
     void update();
-    void step();
+    void step(double time = -1);
     dBodyID build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot);
     dBodyID build_big_faceplate(dReal x, dReal y, dReal z, LQuaternionf rot);
     dBodyID build_body1(dReal x, dReal y, dReal z, LQuaternionf rot);
@@ -58,7 +58,7 @@ class MobotChain
         dSpaceID space, 
         int num_modules);
     MobotModel* mobot(int index);
-    void step();
+    void step(double time = -1);
     void update();
   private:
     WindowFramework *_window;

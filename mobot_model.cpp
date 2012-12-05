@@ -1,4 +1,5 @@
 #include "mobot_model.h"
+#include "main.h"
 
 MobotModel::MobotModel(WindowFramework* window, PandaFramework* framework, dWorldID world, dSpaceID space)
 {
@@ -69,14 +70,19 @@ void MobotModel::update()
   }
 }
 
-void MobotModel::step()
+void MobotModel::step(double time)
 {
   /* Add damping forces */
   int i,j;
   dReal omega;
   dReal err;
   double d;
-  double t = globalClock->get_real_time();
+  double t;
+  if(time == -1) {
+    t = globalClock->get_real_time();
+  } else {
+    t = time;
+  }
 
   for(i = 0; i < 4; i++) {
     if(i == 0 || i == 2) {
@@ -118,15 +124,18 @@ void MobotModel::step()
 
 dBodyID MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot)
 {
-  /* Create the nodepath */
-  NodePath node = _window->load_model(_framework->get_models(), "models/box");
-  node.reparent_to(_window->get_render());
-  node.set_pos(-0.5, -0.5, -0.5);
-  node.flatten_light();
-  //node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
-  node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
-  node.set_pos(x, y, z);
-  node.set_color(0.9, 0.8, 0.8, 1);
+  if(gEnableGraphics) {
+    /* Create the nodepath */
+    NodePath node = _window->load_model(_framework->get_models(), "models/box");
+    node.reparent_to(_window->get_render());
+    node.set_pos(-0.5, -0.5, -0.5);
+    node.flatten_light();
+    //node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
+    node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
+    node.set_pos(x, y, z);
+    node.set_color(0.9, 0.8, 0.8, 1);
+    _nodePaths[_numBodies] = node;
+  }
   dBodyID body = dBodyCreate(_world);
   dMass m;
   dMassSetBox(&m, FACEPLATE_M, FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
@@ -221,27 +230,29 @@ dBodyID MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot
   dBodySetQuaternion(body, quat);
   
   _odeBodies[_numBodies] = body;
-  _nodePaths[_numBodies] = node;
   _numBodies++;
   return body;
 }
 
 dBodyID MobotModel::build_body1(dReal x, dReal y, dReal z, LQuaternionf rot)
 {
-  /* Create the nodepath */
-  NodePath node = _window->load_model(_framework->get_models(), "models/box");
-  node.reparent_to(_window->get_render());
-  //node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
-  node.set_pos(-0.5, -0.5, -0.5);
-  node.flatten_light();
-  node.set_scale(BODY_X, BODY_Y, BODY_Z);
-  node.set_pos(
-      BODY_BOX1_X/2.0 - (BODY_BOX2_X-BODY_CG_OFFSET),
-      (BODY_Y/2.0 - BODY_BOX1_Y), 
-      0);
-  node.flatten_light();
-  node.set_pos(x, y, z);
-  node.set_color(0.8, 0.8, 0.9, 1);
+  if(gEnableGraphics) {
+    /* Create the nodepath */
+    NodePath node = _window->load_model(_framework->get_models(), "models/box");
+    node.reparent_to(_window->get_render());
+    //node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
+    node.set_pos(-0.5, -0.5, -0.5);
+    node.flatten_light();
+    node.set_scale(BODY_X, BODY_Y, BODY_Z);
+    node.set_pos(
+        BODY_BOX1_X/2.0 - (BODY_BOX2_X-BODY_CG_OFFSET),
+        (BODY_Y/2.0 - BODY_BOX1_Y), 
+        0);
+    node.flatten_light();
+    node.set_pos(x, y, z);
+    node.set_color(0.8, 0.8, 0.9, 1);
+    _nodePaths[_numBodies] = node;
+  }
 
   dBodyID body = dBodyCreate(_world);
   dMass m;
@@ -313,27 +324,29 @@ dBodyID MobotModel::build_body1(dReal x, dReal y, dReal z, LQuaternionf rot)
   dBodySetQuaternion(body, quat);
   
   _odeBodies[_numBodies] = body;
-  _nodePaths[_numBodies] = node;
   _numBodies++;
   return body;
 }
 
 dBodyID MobotModel::build_body2(dReal x, dReal y, dReal z, LQuaternionf rot)
 {
-  /* Create the nodepath */
-  NodePath node = _window->load_model(_framework->get_models(), "models/box");
-  node.reparent_to(_window->get_render());
-  //node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
-  node.set_pos(-0.5, -0.5, -0.5);
-  node.flatten_light();
-  node.set_scale(BODY_X, BODY_Y, BODY_Z);
-  node.set_pos(
-      BODY_BOX1_X/2.0 - (BODY_BOX2_X-BODY_CG_OFFSET),
-      -(BODY_Y/2.0 - BODY_BOX1_Y), 
-      0);
-  node.flatten_light();
-  node.set_pos(x, y, z);
-  node.set_color(0.9, 0.9, 0.8, 1);
+  if(gEnableGraphics) {
+    /* Create the nodepath */
+    NodePath node = _window->load_model(_framework->get_models(), "models/box");
+    node.reparent_to(_window->get_render());
+    //node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
+    node.set_pos(-0.5, -0.5, -0.5);
+    node.flatten_light();
+    node.set_scale(BODY_X, BODY_Y, BODY_Z);
+    node.set_pos(
+        BODY_BOX1_X/2.0 - (BODY_BOX2_X-BODY_CG_OFFSET),
+        -(BODY_Y/2.0 - BODY_BOX1_Y), 
+        0);
+    node.flatten_light();
+    node.set_pos(x, y, z);
+    node.set_color(0.9, 0.9, 0.8, 1);
+    _nodePaths[_numBodies] = node;
+  }
 
   dBodyID body = dBodyCreate(_world);
   dMass m;
@@ -405,22 +418,25 @@ dBodyID MobotModel::build_body2(dReal x, dReal y, dReal z, LQuaternionf rot)
   dBodySetQuaternion(body, quat);
   
   _odeBodies[_numBodies] = body;
-  _nodePaths[_numBodies] = node;
   _numBodies++;
   return body;
 }
 
 dBodyID MobotModel::build_center(dReal x, dReal y, dReal z, LQuaternionf rot)
 {
-  /* Create the nodepath */
-  NodePath node = _window->load_model(_framework->get_models(), "models/box");
-  node.reparent_to(_window->get_render());
-  //node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
-  node.set_pos(-0.5, -0.5, -0.5);
-  node.flatten_light();
-  node.set_scale(CENTER_X, CENTER_Y, CENTER_Z);
-  node.set_pos(x, y, z);
-  node.set_color(0.9, 0.8, 0.9, 1);
+  if(gEnableGraphics) {
+    /* Create the nodepath */
+    NodePath node = _window->load_model(_framework->get_models(), "models/box");
+    node.reparent_to(_window->get_render());
+    //node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
+    node.set_pos(-0.5, -0.5, -0.5);
+    node.flatten_light();
+    node.set_scale(CENTER_X, CENTER_Y, CENTER_Z);
+    node.set_pos(x, y, z);
+    node.set_color(0.9, 0.8, 0.9, 1);
+    _nodePaths[_numBodies] = node;
+  }
+
   dBodyID body = dBodyCreate(_world);
   dMass m;
   dMassSetBox(&m, CENTER_M, CENTER_X, CENTER_Y, CENTER_Z);
@@ -467,7 +483,6 @@ dBodyID MobotModel::build_center(dReal x, dReal y, dReal z, LQuaternionf rot)
       0);
 
   _odeBodies[_numBodies] = body;
-  _nodePaths[_numBodies] = node;
   _numBodies++;
 
   return body;
@@ -475,15 +490,19 @@ dBodyID MobotModel::build_center(dReal x, dReal y, dReal z, LQuaternionf rot)
 
 dBodyID MobotModel::build_big_faceplate(dReal x, dReal y, dReal z, LQuaternionf rot)
 {
-  /* Create the nodepath */
-  NodePath node = _window->load_model(_framework->get_models(), "models/box");
-  node.reparent_to(_window->get_render());
-  node.set_pos(-0.5, -0.5, -0.5);
-  node.flatten_light();
-  //node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
-  node.set_scale(FACEPLATE_X, FACEPLATE_COMPOUND_Y, FACEPLATE_Z);
-  node.set_pos(x, y, z);
-  node.set_color(0.8, 0.9, 0.9, 1);
+  if(gEnableGraphics) {
+    /* Create the nodepath */
+    NodePath node = _window->load_model(_framework->get_models(), "models/box");
+    node.reparent_to(_window->get_render());
+    node.set_pos(-0.5, -0.5, -0.5);
+    node.flatten_light();
+    //node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
+    node.set_scale(FACEPLATE_X, FACEPLATE_COMPOUND_Y, FACEPLATE_Z);
+    node.set_pos(x, y, z);
+    node.set_color(0.8, 0.9, 0.9, 1);
+    _nodePaths[_numBodies] = node;
+  }
+
   dBodyID body = dBodyCreate(_world);
   dMass m;
   dMassSetBox(&m, FACEPLATE_M*3.0, FACEPLATE_X, FACEPLATE_COMPOUND_Y, FACEPLATE_Z);
@@ -578,7 +597,6 @@ dBodyID MobotModel::build_big_faceplate(dReal x, dReal y, dReal z, LQuaternionf 
   dBodySetQuaternion(body, quat);
   
   _odeBodies[_numBodies] = body;
-  _nodePaths[_numBodies] = node;
   _numBodies++;
   return body;
 }
@@ -923,12 +941,12 @@ MobotModel* MobotChain::mobot(int index)
   return _mobots[index];
 }
 
-void MobotChain::step()
+void MobotChain::step(double time)
 {
   int i;
   dReal angles[4];
   for(i = 0; i < _numMobots; i++) {
-    _mobots[i]->step();
+    _mobots[i]->step(time);
   }
 
 #if 0
