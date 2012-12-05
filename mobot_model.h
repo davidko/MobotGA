@@ -9,7 +9,7 @@
 #define RAD2DEG(x) ((x)*180.0/M_PI)
 #define DEG2RAD(x) ((x)*M_PI/180.0)
 #define C2V(x) ((((double)x - 128)/128.0)*5.0)
-#define WAIT_TIME 2
+#define WAIT_TIME 0
 
 extern PT(ClockObject) globalClock;
 
