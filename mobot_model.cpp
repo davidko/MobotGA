@@ -50,10 +50,12 @@ MobotModel::MobotModel(WindowFramework* window, PandaFramework* framework, dWorl
       for(j = 0; j < 5; j++) {
         fscanf(coefs, "%d", &d);
         _a[i][j] = d;
+        //printf("%lf\n", C2V(_a[i][j]));
       }
       for(j = 0; j < 5; j++) {
         fscanf(coefs, "%d", &d);
         _b[i][j] = d;
+        //printf("%lf\n", C2V(_b[i][j]));
       }
     }
   }
@@ -94,7 +96,7 @@ void MobotModel::step(double time)
   dReal err;
   double d;
   double t;
-  if(time == -1) {
+  if(time < 0) {
     t = globalClock->get_real_time();
   } else {
     t = time;
@@ -111,7 +113,6 @@ void MobotModel::step(double time)
     for(j = 1; j < 5; j++) {
       _desiredAngles[i] += (dReal)C2V(_a[i][j]) * (dReal)sin(2*M_PI*t*j/10.0);
       _desiredAngles[i] += (dReal)C2V(_b[i][j]) * (dReal)cos(2*M_PI*t*j/10.0);
-      //printf("%lf\n", C2V(a[i][j]));
     }
     if(i == 1 || i == 2) {
       if(_desiredAngles[i] > M_PI/2.0) {
@@ -976,11 +977,13 @@ void MobotChain::step(double time)
   printf("\n");
 #endif
   // Print position data of center mobot
+  /*
   const dReal* pos = _mobots[_numMobots/2]->get_position(3);
   for(i = 0; i < 3; i++) {
     printf("%lf ", pos[i]);
   }
   printf("\n");
+  */
 }
 
 void MobotChain::update()

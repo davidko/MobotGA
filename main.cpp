@@ -125,10 +125,11 @@ int main(int argc, char *argv[]) {
   }
 
   if(gEnableGraphics) {
-    stepSize = 1.0f / 30.0;
+    stepSize = 1.0f / 40.0;
     initGraphics(argc, argv);
   } else {
-    stepSize = 1.0f / 30.0;
+    stepSize = 1.0f / 40.0;
+    dInitODE();
   }
 
 #if 0
@@ -157,14 +158,25 @@ int main(int argc, char *argv[]) {
   } else {
     double time = 0;
     while(1) {
-      printf("%lf ", time);
+      //printf("%lf ", time);
       dSpaceCollide (space,0,&nearCallback);
-      dWorldStep(world, stepSize);
-      chain->step(time);
+      dWorldQuickStep(world, stepSize);
+      if(time > WAIT_TIME)
+        chain->step(time);
       dJointGroupEmpty(contactgroup);
       time += stepSize;
       if(time > 30) {break;}
     }
+    /* Print the total distance traveled by center module */
+    /* Initial position is -0.014000 0.337325 -0.010900 */
+    const dReal *pos = chain->mobot(1)->get_position(2);
+    double initPos[3];
+    double distance = 0;
+    for(i = 0; i < 3; i++) {
+      distance += (initPos[i]-pos[i])*(initPos[i]-pos[i]);
+    }
+    distance = sqrt(distance);
+    printf("%lf\n", distance);
   }
   return (0);
 }
