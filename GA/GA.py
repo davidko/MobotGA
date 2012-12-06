@@ -42,9 +42,10 @@ class Chromosome:
 
   def crossover(self, c):
     '''c is another chromosome'''
-    x = random.randint(1, 39);
+    x = random.randint(1, 119);
     newChromosome = Chromosome()
     for i in range (0, x):
+
       newChromosome.data[i] = self.data[i]
     for i in range (x, 40):
       newChromosome.data[i] = c.data[i]
@@ -82,8 +83,13 @@ class Population:
       c.loadFile('{}/{}'.format(dirname, f))
       self.members.append(c)
       i = i + 1
-    self.members.sort(key = lambda m: m.fitness())
+    self.members.sort(key = lambda m: m.fitness(), reverse = True)
     return population
+
+  def writeDir(self, dirname):
+    os.mkdir(dirname)
+    for m,i in zip(self.members,range(0,len(self.members))):
+      m.writeFile('{}/chromosome{}.txt'.format(dirname, str(i).zfill(3)))
 
   def writeFitnesses(self, filename):
     f = open(filename, "w")
@@ -104,14 +110,24 @@ class Population:
   def max(self):
     return self.members[-1].fitness()
 
+  def regen(self):
+    '''Create and return a new population generated from the elite members of the last population'''
+    newpop = self.members[0:len(self.members)/2]
+    while len(newpop) < len(self.members):
+      m1 = newpop[random.randint(0, len(newpop)-1)]
+      m2 = newpop[random.randint(0, len(newpop)-1)]
+      newpop.append( m1.crossover(m2) )
+    self.members = list(newpop)
+
 if __name__ == '__main__':
   statsfile = open('GAstats.txt', 'w')
-  # Load the population
-  i = 0
   population = Population()
-  population.loadDir('gen{}'.format(str(i).zfill(3)))
-  population.writeFitnesses('fitnesses{}'.format(str(i).zfill(3)))
-  # sort the population by fitness 
-  statsfile.write('{} {} {}\n'.format(population.min(), population.avg(), population.max()))
+  for i in range(0, 50)
+    population.loadDir('gen{}'.format(str(i).zfill(3)))
+    population.writeFitnesses('fitnesses{}'.format(str(i).zfill(3)))
+    # sort the population by fitness 
+    statsfile.write('{} {} {}\n'.format(population.min(), population.avg(), population.max()))
+    population.regen()
+    population.writeDir('gen{}'.format(str(i+1).zfill(3)))
   statsfile.close()
 
