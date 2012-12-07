@@ -113,16 +113,18 @@ class Population:
   def regen(self):
     '''Create and return a new population generated from the elite members of the last population'''
     newpop = self.members[0:len(self.members)/2]
+    eliteNum = len(newpop)
     while len(newpop) < len(self.members):
-      m1 = newpop[random.randint(0, len(newpop)-1)]
-      m2 = newpop[random.randint(0, len(newpop)-1)]
+      m1 = newpop[random.randint(0, eliteNum-1)]
+      m2 = newpop[random.randint(0, eliteNum-1)]
       newpop.append( m1.crossover(m2) )
     self.members = list(newpop)
 
 if __name__ == '__main__':
   statsfile = open('GAstats.txt', 'w')
   population = Population()
-  for i in range(0, 50)
+  population.newPopulation('gen000', 200)
+  for i in range(0, 50):
     population.loadDir('gen{}'.format(str(i).zfill(3)))
     population.writeFitnesses('fitnesses{}'.format(str(i).zfill(3)))
     # sort the population by fitness 

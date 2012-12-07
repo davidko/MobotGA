@@ -124,12 +124,12 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  dInitODE();
   if(gEnableGraphics) {
-    stepSize = 1.0f / 40.0;
+    stepSize = 1.0f / 90.0;
     initGraphics(argc, argv);
   } else {
-    stepSize = 1.0f / 40.0;
-    dInitODE();
+    stepSize = 1.0f / 90.0;
   }
 
 #if 0
@@ -165,7 +165,7 @@ int main(int argc, char *argv[]) {
         chain->step(time);
       dJointGroupEmpty(contactgroup);
       time += stepSize;
-      if(time > 30) {break;}
+      if(time > 90) {break;}
     }
     /* Print the total distance traveled by center module */
     /* Initial position is -0.014000 0.337325 -0.010900 */
@@ -258,6 +258,7 @@ void simulation(FILE* coefs){
  
 // The task for our simulation
 AsyncTask::DoneStatus simulationTask (GenericAsyncTask* task, void* data) {
+  static double mytime = 0;
   if(init) {
     dAllocateODEDataForThread(dAllocateMaskAll);
     init = 0;
@@ -272,9 +273,10 @@ AsyncTask::DoneStatus simulationTask (GenericAsyncTask* task, void* data) {
     deltaTimeAccumulator -= stepSize;
     // Step the simulation
     dSpaceCollide (space,0,&nearCallback);
-    dWorldStep(world, stepSize);
+    dWorldQuickStep(world, stepSize);
     if(globalClock->get_real_time() > WAIT_TIME) {
-      chain->step();
+      chain->step(mytime);
+      mytime += stepSize;
     }
     //mobot->step();
     //mobot2->step();
