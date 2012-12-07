@@ -129,6 +129,7 @@ if __name__ == '__main__':
     population.writeFitnesses('fitnesses{}'.format(str(i).zfill(3)))
     # sort the population by fitness 
     statsfile.write('{} {} {}\n'.format(population.min(), population.avg(), population.max()))
+    statsfile.flush()
     population.regen()
     population.writeDir('gen{}'.format(str(i+1).zfill(3)))
   statsfile.close()
