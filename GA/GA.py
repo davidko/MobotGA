@@ -2,6 +2,7 @@
 import os
 import random
 import subprocess
+import math
 
 class Chromosome:
   def __init__(self, index = 0):
@@ -59,7 +60,13 @@ class Chromosome:
     command = ['../main',  '--disable-graphics',  '--load-coefs', './{}'.format(self.filename)]
     print command
     output = subprocess.check_output(command)
-    self.__fitness = float(output)
+    positions = output.split()
+    distance = 0.0;
+    for p in positions:
+      distance = distance + float(p)**2
+      print distance
+    distance = math.sqrt(distance)
+    self.__fitness = distance
 
 class Population:
   def __init__(self):
@@ -112,7 +119,7 @@ class Population:
 
   def regen(self):
     '''Create and return a new population generated from the elite members of the last population'''
-    newpop = self.members[0:len(self.members)/2]
+    newpop = self.members[0:len(self.members)/5]
     eliteNum = len(newpop)
     while len(newpop) < len(self.members):
       m1 = newpop[random.randint(0, eliteNum-1)]

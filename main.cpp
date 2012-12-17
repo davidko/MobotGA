@@ -4,6 +4,7 @@
 #include "pandaFramework.h"
 #include "pandaSystem.h"
 #include "cIntervalManager.h"
+#include "lineSegs.h"
 #include "mobot_model.h"
 #include "texturePool.h"
 #include "pointLight.h"
@@ -14,6 +15,7 @@ using namespace std;
 #define MAX_CONTACTS 8          // maximum number of contact points per body
 // Global stuff
 
+#define ABS(x) ((x) < 0 ? -(x) : (x))
  
 dWorldID world;
 dSpaceID space;
@@ -165,18 +167,24 @@ int main(int argc, char *argv[]) {
         chain->step(time);
       dJointGroupEmpty(contactgroup);
       time += stepSize;
-      if(time > 90) {break;}
+      if(time > 120) {break;}
     }
     /* Print the total distance traveled by center module */
     /* Initial position is -0.014000 0.337325 -0.010900 */
     const dReal *pos = chain->mobot(1)->get_position(2);
-    double initPos[3];
+    double initPos[3] = {-0.014, 0.337325, -0.109};
+    /*
     double distance = 0;
     for(i = 0; i < 3; i++) {
       distance += (initPos[i]-pos[i])*(initPos[i]-pos[i]);
     }
     distance = sqrt(distance);
     printf("%lf\n", distance);
+    */
+    for(i = 0; i < 3; i++) {
+      printf("%lf ", ABS(initPos[i]-pos[i]));
+    }
+    printf("\n");
   }
   return (0);
 }
@@ -205,6 +213,11 @@ void initGraphics(int argc, char *argv[])
   alight->set_color(LVecBase4f(0.8, 0.8, 0.8, 0.5));
   NodePath alnp = window->get_render().attach_new_node(alight);
   window->get_render().set_light(alnp);
+
+  LineSegs segs = LineSegs();
+  segs.move_to(0, 0, 0.0);
+  segs.draw_to(.5, 0, 0.0);
+  window->get_render().attach_new_node(segs.create());
 }
 
 void closeGraphics(void)
@@ -239,7 +252,7 @@ void simulation(FILE* coefs){
 
   dWorldSetContactMaxCorrectingVel (world,0.1);
   dWorldSetContactSurfaceLayer (world,0.001);
-  dCreatePlane (space,0,0,1,-0.5);
+  dCreatePlane (space,0,0,1,-0.25);
   dSpaceCollide (space,0,&nearCallback);
 
   if(gEnableGraphics) {
@@ -293,9 +306,11 @@ AsyncTask::DoneStatus simulationTask (GenericAsyncTask* task, void* data) {
   double angledegrees = time * 30.0;
   angledegrees = 120.0;
   double angleradians = angledegrees * (3.14 / 180.0);
-  camera.set_pos(-2*sin(angleradians),-2*cos(angleradians),1);
-  //camera.set_pos(LVector3f(pos[0], pos[1], pos[2]) + LVector3f(1, 1, 1));
-  camera.look_at(LVector3f(pos[0], pos[1], pos[2]));
+  if(globalClock->get_real_time() < 1) {
+    camera.set_pos(-2*sin(angleradians),-2*cos(angleradians),1);
+    //camera.set_pos(LVector3f(pos[0], pos[1], pos[2]) + LVector3f(1, 1, 1));
+    camera.look_at(LVector3f(pos[0], pos[1], pos[2]));
+  }
 
   return AsyncTask::DS_cont;
 }
