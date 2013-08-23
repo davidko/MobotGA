@@ -143,7 +143,7 @@ dBodyID MobotModel::build_faceplate1(dReal x, dReal y, dReal z, LQuaternionf rot
 {
   if(gEnableGraphics) {
     /* Create the nodepath */
-    NodePath node = _window->load_model(_framework->get_models(), "models/box");
+    NodePath node = _window->load_model(_framework->get_models(), "models/box.bam");
     node.reparent_to(_window->get_render());
     node.set_pos(-0.5, -0.5, -0.5);
     node.flatten_light();
@@ -255,7 +255,7 @@ dBodyID MobotModel::build_body1(dReal x, dReal y, dReal z, LQuaternionf rot)
 {
   if(gEnableGraphics) {
     /* Create the nodepath */
-    NodePath node = _window->load_model(_framework->get_models(), "models/box");
+    NodePath node = _window->load_model(_framework->get_models(), "models/box.bam");
     node.reparent_to(_window->get_render());
     //node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
     node.set_pos(-0.5, -0.5, -0.5);
@@ -349,7 +349,7 @@ dBodyID MobotModel::build_body2(dReal x, dReal y, dReal z, LQuaternionf rot)
 {
   if(gEnableGraphics) {
     /* Create the nodepath */
-    NodePath node = _window->load_model(_framework->get_models(), "models/box");
+    NodePath node = _window->load_model(_framework->get_models(), "models/box.bam");
     node.reparent_to(_window->get_render());
     //node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
     node.set_pos(-0.5, -0.5, -0.5);
@@ -443,7 +443,7 @@ dBodyID MobotModel::build_center(dReal x, dReal y, dReal z, LQuaternionf rot)
 {
   if(gEnableGraphics) {
     /* Create the nodepath */
-    NodePath node = _window->load_model(_framework->get_models(), "models/box");
+    NodePath node = _window->load_model(_framework->get_models(), "models/box.bam");
     node.reparent_to(_window->get_render());
     //node.set_scale(FACEPLATE_X, FACEPLATE_Y, FACEPLATE_Z);
     node.set_pos(-0.5, -0.5, -0.5);
@@ -509,7 +509,7 @@ dBodyID MobotModel::build_big_faceplate(dReal x, dReal y, dReal z, LQuaternionf 
 {
   if(gEnableGraphics) {
     /* Create the nodepath */
-    NodePath node = _window->load_model(_framework->get_models(), "models/box");
+    NodePath node = _window->load_model(_framework->get_models(), "models/box.bam");
     node.reparent_to(_window->get_render());
     node.set_pos(-0.5, -0.5, -0.5);
     node.flatten_light();
