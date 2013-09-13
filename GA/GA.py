@@ -64,8 +64,8 @@ class Chromosome:
     distance = 0.0;
     for p in positions:
       distance = distance + float(p)**2
-      print distance
     distance = math.sqrt(distance)
+    print distance
     self.__fitness = distance
 
 class Population:
