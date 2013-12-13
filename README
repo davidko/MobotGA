@@ -1,1 +1,7 @@
 Built with Panda 1.8 and ODE 0.11.1
+
+Prereqs for unix:
+bison
+flex
+
+Built panda with makepanda/makepanda.py --everything
