@@ -3,6 +3,7 @@
 
 MobotModel::MobotModel(WindowFramework* window, PandaFramework* framework, dWorldID world, dSpaceID space, FILE* coefs)
 {
+  char line[128];
   _window = window;
   _framework = framework;
   _numBodies = 0;
@@ -48,12 +49,14 @@ MobotModel::MobotModel(WindowFramework* window, PandaFramework* framework, dWorl
     /* If there is a coefficients file, use that */
     for(i = 0; i < 4; i++) {
       for(j = 0; j < 5; j++) {
-        fscanf(coefs, "%d", &d);
+        fgets(line, sizeof(line), coefs);
+        sscanf(line, "%d", &d);
         _a[i][j] = d;
         //printf("%lf\n", C2V(_a[i][j]));
       }
       for(j = 0; j < 5; j++) {
-        fscanf(coefs, "%d", &d);
+        fgets(line, sizeof(line), coefs);
+        sscanf(line, "%d", &d);
         _b[i][j] = d;
         //printf("%lf\n", C2V(_b[i][j]));
       }
