@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-from PyAgentGA.agent import Agent
-from PyAgentGA.agency import Agency
+from evoagent.agent import EvoAgent
+from evoagent.agency import EvoAgency
 
-class PyAgentGAException(Exception):
+class EvoAgentException(Exception):
     def __init__(self, *args, **kwargs):
         Exception.__init__(self, *args, **kwargs)

@@ -47,7 +47,10 @@ class AMS():
             new_id = "Agent" + str(random.randint(0, 32000))
         return new_id
 
-class Agency():
+    def _set_AMS(self, ams):
+        self.ams = ams
+
+class EvoAgency():
     def __init__(self):
         self.ams = AMS()
         self.ams.start_work()

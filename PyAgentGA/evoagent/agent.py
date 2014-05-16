@@ -32,17 +32,17 @@ class Chromosome():
     def get_fitness(self):
         pass
 
-class AgentException(Exception):
+class EvoAgentException(Exception):
     def __init__(self):
         Exception.__init__(self)
 
-class Agent():
+class EvoAgent():
     AGENT_EGG = 0
     AGENT_ALIVE = 1
     AGENT_DEAD = 2
 
     def __init__(self, agentId):
-        self.status = Agent.AGENT_EGG
+        self.status = EvoAgent.AGENT_EGG
         self.chromosome = None
         self.agentId = agentId
 
