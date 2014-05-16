@@ -46,6 +46,9 @@ class EvoAgent():
         self.chromosome = None
         self.agentId = agentId
 
+    def get_ams(self):
+        return self.ams
+
     def get_id(self):
         return self.agentId
 
@@ -55,7 +58,7 @@ class EvoAgent():
     def get_status(self):
         return self.status
 
-    def set_ams(self, ams):
+    def _set_ams(self, ams):
         self.ams = ams
 
     def set_id(self, agentId):
@@ -67,6 +70,6 @@ class EvoAgent():
     def compute_fitness(self):
         self.__fitness = self.chromosome.compute_fitness()
 
-    def doWork(self):
-        self.status = AGENT_ALIVE
+    def do_work(self):
+        pass
 
