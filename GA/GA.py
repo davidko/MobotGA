@@ -10,7 +10,7 @@ class Chromosome:
     ''' initChromosome is a list of chromosome values '''
     self.data = []
     for i in range (0, 120):
-      self.data.append( random.randint(0, 200) )
+      self.data.append( random.randint(0, 255) )
     self.__fitness = 0
 
   def __str__(self):
@@ -46,7 +46,6 @@ class Chromosome:
     x = random.randint(1, 119);
     newChromosome = Chromosome()
     for i in range (0, x):
-
       newChromosome.data[i] = self.data[i]
     for i in range (x, 40):
       newChromosome.data[i] = c.data[i]
@@ -130,8 +129,8 @@ class Population:
 if __name__ == '__main__':
   statsfile = open('GAstats.txt', 'w')
   population = Population()
-  population.newPopulation('gen000', 200)
-  for i in range(0, 50):
+  population.newPopulation('gen000', 40)
+  for i in range(0, 1000):
     population.loadDir('gen{}'.format(str(i).zfill(3)))
     population.writeFitnesses('fitnesses{}'.format(str(i).zfill(3)))
     # sort the population by fitness 
