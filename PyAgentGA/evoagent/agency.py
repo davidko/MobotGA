@@ -5,6 +5,8 @@ import time
 import random
 import os
 
+import logging
+
 class AMQ(): # Agent message queue
     def __init__(self):
         self.messages = []
@@ -31,13 +33,16 @@ class AMQ(): # Agent message queue
         return item
 
 class AMS():
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         self.agents = {}
         self.agents_lock = threading.Condition()
         self.thread = threading.Thread(target=self._do_work)
         self.agent_message_queue = AMQ()
+        self.log = logging.Logger('AMS')
 
     def add_agent(self, agent):
+        self.log.debug('Got agent: ' + agent.get_id())
         self.agents_lock.acquire()
         if agent.get_id() in self.agents.keys():
             agent.set_id(self._new_id())
@@ -48,7 +53,7 @@ class AMS():
         pass
 
     def get_remote_hosts(self):
-        return ['remote_host']
+        return self.ns.list(prefix='EvoAgency')
 
     def kill_agent(self, agentID):
         pass
@@ -60,6 +65,9 @@ class AMS():
         self.keep_alive = True
         if not self.thread.is_alive():
             self.thread.start()
+
+    def ping(self):
+        return "ping"
 
     def stop_work(self):
         self.keep_alive = False
@@ -83,9 +91,10 @@ class AMS():
     def _set_AMS(self, ams):
         self.ams = ams
 
+
 class EvoAgency():
     def __init__(self, name = None):
-        self.ams = AMS()
+        self.ams = AMS(name)
         self.ams.start_work()
         self.name = name
 
@@ -93,12 +102,17 @@ class EvoAgency():
         return self.ams.add_agent(agent)
 
     def mainloop(self):
+        # Start Pyro4 daemon
         if self.name is None:
             self.name = 'EvoAgency-' + str(os.getpid())
         self.daemon = Pyro4.Daemon()
-        ns = Pyro4.locateNS(host='sidekick' )
+        self.ns = Pyro4.locateNS(host='localhost' )
         uri = self.daemon.register(self.ams)
-        ns.register(self.name, uri)
+        print(uri)
+        self.ns.register(self.name, uri)
         self.daemon.requestLoop()
+
+    def ping(self):
+        return 'ping'
         
         

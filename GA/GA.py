@@ -3,8 +3,12 @@ import os
 import random
 import subprocess
 import math
+import threading
 
 class Chromosome:
+  instances_lock = threading.Condition()
+  num_instances = 0
+  max_instances = 4
   def __init__(self, index = 0):
     self.index = index
     ''' initChromosome is a list of chromosome values '''
@@ -12,6 +16,7 @@ class Chromosome:
     for i in range (0, 120):
       self.data.append( random.randint(0, 255) )
     self.__fitness = 0
+    self.thread = None
 
   def __str__(self):
     mystr = str(self.fitness())
@@ -34,6 +39,27 @@ class Chromosome:
     self.filename = filename
     self.calculate_fitness()
 
+  def asyncLoadFile(self, *_args):
+    self.thread = threading.Thread(
+        target=self.asyncLoadFile_thread,
+        args=_args)
+    self.thread.start()
+
+  def asyncLoadFile_thread(self, filename):
+    Chromosome.instances_lock.acquire()
+    while Chromosome.num_instances >= Chromosome.max_instances:
+        Chromosome.instances_lock.wait()
+    Chromosome.num_instances += 1
+    Chromosome.instances_lock.release()
+
+    self.loadFile(filename)
+
+    Chromosome.instances_lock.acquire()
+    Chromosome.num_instances -= 1
+    Chromosome.instances_lock.notify()
+    Chromosome.instances_lock.release()
+
+
   def writeFile(self, filename):
     f = open(filename, "w")
     for i in self.data:
@@ -47,7 +73,7 @@ class Chromosome:
     newChromosome = Chromosome()
     for i in range (0, x):
       newChromosome.data[i] = self.data[i]
-    for i in range (x, 40):
+    for i in range (x, 120):
       newChromosome.data[i] = c.data[i]
     return newChromosome
 
@@ -82,13 +108,18 @@ class Population:
   def loadDir(self, dirname):
     self.members = [];
     files = os.listdir(dirname)
+    files = filter(lambda x: x.endswith(".txt"), files)
     files.sort()
     i = 0
     for f in files:
       c = Chromosome(i)
-      c.loadFile('{}/{}'.format(dirname, f))
+      #c.loadFile('{}/{}'.format(dirname, f))
+      c.asyncLoadFile('{}/{}'.format(dirname, f))
       self.members.append(c)
       i = i + 1
+    for m in self.members:
+        m.thread.join()
+
     self.members.sort(key = lambda m: m.fitness(), reverse = True)
     return population
 
@@ -116,9 +147,22 @@ class Population:
   def max(self):
     return self.members[-1].fitness()
 
+  def diversity(self):
+    # First, calculate centroids
+    centroids = [0 for _ in range(len(self.members[0].data))]
+    for m in self.members:
+        centroids = [x+y for x,y in zip(centroids, m.data)]
+    centroids = map(lambda x: float(x)/len(self.members), centroids)
+    # Now calculate inertias
+    inertia = 0
+    for i in range(len(self.members[0].data)):
+        for j in range(len(self.members)):
+            inertia += (self.members[j].data[i] - centroids[i])**2
+    return inertia
+
   def regen(self):
     '''Create and return a new population generated from the elite members of the last population'''
-    newpop = self.members[0:len(self.members)/5]
+    newpop = self.members[0:len(self.members)/2]
     eliteNum = len(newpop)
     while len(newpop) < len(self.members):
       m1 = newpop[random.randint(0, eliteNum-1)]
@@ -129,14 +173,19 @@ class Population:
 if __name__ == '__main__':
   statsfile = open('GAstats.txt', 'w')
   population = Population()
-  population.newPopulation('gen000', 40)
-  for i in range(0, 1000):
+  population.newPopulation('gen000', 200)
+  diversity = 100
+  i = 0
+  while diversity > 0:
     population.loadDir('gen{}'.format(str(i).zfill(3)))
     population.writeFitnesses('fitnesses{}'.format(str(i).zfill(3)))
     # sort the population by fitness 
-    statsfile.write('{} {} {}\n'.format(population.min(), population.avg(), population.max()))
+    diversity = population.diversity()
+    statsfile.write('{} {} {} {}\n'.format(population.min(), population.avg(),
+        population.max(), diversity))
     statsfile.flush()
     population.regen()
     population.writeDir('gen{}'.format(str(i+1).zfill(3)))
+    i += 1
   statsfile.close()
 
