@@ -4,7 +4,9 @@ import random
 import subprocess
 import math
 import threading
+import hashlib
 
+known_fitnesses = {}
 class Chromosome:
   instances_lock = threading.Condition()
   num_instances = 0
@@ -82,16 +84,24 @@ class Chromosome:
 
   def calculate_fitness(self):
     ''' returns the distance traveled in 30 seconds in meters '''
-    command = ['../main',  '--disable-graphics',  '--load-coefs', './{}'.format(self.filename)]
-    print command
-    output = subprocess.check_output(command)
-    positions = output.split()
-    distance = 0.0;
-    for p in positions:
-      distance = distance + float(p)**2
-    distance = math.sqrt(distance)
-    print distance
-    self.__fitness = distance
+    ''' See if the fitness is already known '''
+    m = hashlib.md5()
+    m.update(str(self.data))
+    try:
+        self.__fitness = known_fitnesses[m.digest()]
+        print('Using saved fitness: {0}'.format(self.__fitness))
+    except:
+        command = ['../main',  '--disable-graphics',  '--load-coefs', './{}'.format(self.filename)]
+        print command
+        output = subprocess.check_output(command)
+        positions = output.split()
+        distance = 0.0;
+        for p in positions:
+          distance = distance + float(p)**2
+        distance = math.sqrt(distance)
+        print distance
+        self.__fitness = distance
+        known_fitnesses[m.digest()] = distance
 
 class Population:
   def __init__(self):
