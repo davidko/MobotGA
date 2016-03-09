@@ -183,7 +183,7 @@ class Population:
 if __name__ == '__main__':
   statsfile = open('GAstats.txt', 'w')
   population = Population()
-  population.newPopulation('gen000', 100)
+  population.newPopulation('gen000', 50)
   diversity = 100
   i = 0
   while diversity > 0:
